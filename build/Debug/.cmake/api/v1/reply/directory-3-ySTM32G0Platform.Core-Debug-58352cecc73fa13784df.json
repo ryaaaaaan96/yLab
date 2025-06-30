@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "3-ySTM32G0Platform/Core",
+		"source" : "3-ySTM32G0Platform/Core"
+	}
+}

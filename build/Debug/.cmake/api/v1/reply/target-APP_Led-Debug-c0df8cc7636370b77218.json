@@ -1,0 +1,173 @@
+{
+	"archive" : {},
+	"artifacts" : 
+	[
+		{
+			"path" : "1-app/led/libAPP_Led.a"
+		}
+	],
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_library",
+			"target_link_libraries"
+		],
+		"files" : 
+		[
+			"1-app/led/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 50,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 55,
+				"parent" : 0
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : " -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3"
+				},
+				{
+					"fragment" : "-std=gnu11"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 2,
+					"define" : "STM32G070xx"
+				},
+				{
+					"backtrace" : 2,
+					"define" : "USE_FULL_LL_DRIVER"
+				},
+				{
+					"backtrace" : 2,
+					"define" : "USE_HAL_DRIVER"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 2,
+					"path" : "/home/ryan/\u6587\u6863/yLab/1-app/led"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "/home/ryan/\u6587\u6863/yLab/1-app/led/inc"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "/home/ryan/\u6587\u6863/yLab/2-Midware/yDev/inc"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "/home/ryan/\u6587\u6863/yLab/3-ySTM32G0Platform/yDrv/inc"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "/home/ryan/\u6587\u6863/yLab/3-ySTM32G0Platform/fwlib"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "/home/ryan/\u6587\u6863/yLab/3-ySTM32G0Platform/fwlib/Inc"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "/home/ryan/\u6587\u6863/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "/home/ryan/\u6587\u6863/yLab/3-ySTM32G0Platform/Core"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "/home/ryan/\u6587\u6863/yLab/3-ySTM32G0Platform/Core/CMSIS"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "/home/ryan/\u6587\u6863/yLab/3-ySTM32G0Platform/yLib/inc"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "/home/ryan/\u6587\u6863/yLab/3-ySTM32G0Platform/yLib"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "/home/ryan/\u6587\u6863/yLab/2-Midware/freeRTOS/inc"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "/home/ryan/\u6587\u6863/yLab/2-Midware/freeRTOS"
+				}
+			],
+			"language" : "C",
+			"languageStandard" : 
+			{
+				"backtraces" : 
+				[
+					1
+				],
+				"standard" : "11"
+			},
+			"sourceIndexes" : 
+			[
+				0,
+				1
+			]
+		}
+	],
+	"id" : "APP_Led::@ad5b10406a416a5a7caf",
+	"name" : "APP_Led",
+	"nameOnDisk" : "libAPP_Led.a",
+	"paths" : 
+	{
+		"build" : "1-app/led",
+		"source" : "1-app/led"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				0,
+				1
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "1-app/led/src/blink.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "1-app/led/src/switch.c",
+			"sourceGroupIndex" : 0
+		}
+	],
+	"type" : "STATIC_LIBRARY"
+}

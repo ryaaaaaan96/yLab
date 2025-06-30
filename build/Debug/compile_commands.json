@@ -1,0 +1,227 @@
+[
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/yLib/CMakeFiles/yLib.dir/src/yLib_fifo.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/src/yLib_fifo.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/src/yLib_fifo.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/yLib/CMakeFiles/yLib.dir/src/yLib_heap.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/src/yLib_heap.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/src/yLib_heap.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/yLib/CMakeFiles/yLib.dir/src/yLib_list.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/src/yLib_list.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/src/yLib_list.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/yLib/CMakeFiles/yLib.dir/src/yLib_mempool.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/src/yLib_mempool.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/src/yLib_mempool.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/yLib/CMakeFiles/yLib.dir/src/yLib_rbtree.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/src/yLib_rbtree.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/src/yLib_rbtree.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/yLib/CMakeFiles/yLib.dir/src/yLib_ring.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/src/yLib_ring.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/src/yLib_ring.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/Core/CMakeFiles/Core.dir/system_stm32g0xx.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/Core/system_stm32g0xx.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/system_stm32g0xx.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -x assembler-with-cpp -MMD -MP -g -o 3-ySTM32G0Platform/Core/CMakeFiles/Core.dir/startup_stm32g070xx.s.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/Core/startup_stm32g070xx.s",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/startup_stm32g070xx.s"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/fwlib/CMakeFiles/Fwlib.dir/Src/stm32g0xx_hal_tim.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_tim.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_tim.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/fwlib/CMakeFiles/Fwlib.dir/Src/stm32g0xx_hal_tim_ex.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_tim_ex.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_tim_ex.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/fwlib/CMakeFiles/Fwlib.dir/Src/stm32g0xx_ll_tim.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_ll_tim.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_ll_tim.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/fwlib/CMakeFiles/Fwlib.dir/Src/stm32g0xx_ll_gpio.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_ll_gpio.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_ll_gpio.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/fwlib/CMakeFiles/Fwlib.dir/Src/stm32g0xx_ll_exti.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_ll_exti.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_ll_exti.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/fwlib/CMakeFiles/Fwlib.dir/Src/stm32g0xx_hal_gpio.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_gpio.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_gpio.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/fwlib/CMakeFiles/Fwlib.dir/Src/stm32g0xx_hal_exti.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_exti.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_exti.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/fwlib/CMakeFiles/Fwlib.dir/Src/stm32g0xx_ll_rcc.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_ll_rcc.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_ll_rcc.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/fwlib/CMakeFiles/Fwlib.dir/Src/stm32g0xx_ll_utils.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_ll_utils.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_ll_utils.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/fwlib/CMakeFiles/Fwlib.dir/Src/stm32g0xx_hal_rcc.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_rcc.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_rcc.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/fwlib/CMakeFiles/Fwlib.dir/Src/stm32g0xx_hal_rcc_ex.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_rcc_ex.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_rcc_ex.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/fwlib/CMakeFiles/Fwlib.dir/Src/stm32g0xx_hal_flash.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_flash.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_flash.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/fwlib/CMakeFiles/Fwlib.dir/Src/stm32g0xx_hal_flash_ex.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_flash_ex.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_flash_ex.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/fwlib/CMakeFiles/Fwlib.dir/Src/stm32g0xx_hal_dma.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_dma.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_dma.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/fwlib/CMakeFiles/Fwlib.dir/Src/stm32g0xx_hal_dma_ex.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_dma_ex.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_dma_ex.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/fwlib/CMakeFiles/Fwlib.dir/Src/stm32g0xx_hal_pwr.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_pwr.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_pwr.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/fwlib/CMakeFiles/Fwlib.dir/Src/stm32g0xx_hal_pwr_ex.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_pwr_ex.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_pwr_ex.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/fwlib/CMakeFiles/Fwlib.dir/Src/stm32g0xx_hal_cortex.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_cortex.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal_cortex.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/fwlib/CMakeFiles/Fwlib.dir/Src/stm32g0xx_hal.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Src/stm32g0xx_hal.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yDrv/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/yDrv/CMakeFiles/yDrv.dir/src/yDrv_basic.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/yDrv/src/yDrv_basic.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/yDrv/src/yDrv_basic.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yDrv/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/yDrv/CMakeFiles/yDrv.dir/src/yDrv_gpio.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/yDrv/src/yDrv_gpio.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/yDrv/src/yDrv_gpio.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yDrv/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 3-ySTM32G0Platform/yDrv/CMakeFiles/yDrv.dir/src/yDrv.c.obj -c /home/ryan/文档/yLab/3-ySTM32G0Platform/yDrv/src/yDrv.c",
+  "file": "/home/ryan/文档/yLab/3-ySTM32G0Platform/yDrv/src/yDrv.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/2-Midware/yDev/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yDrv/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 2-Midware/yDev/CMakeFiles/yDev.dir/src/yDev.c.obj -c /home/ryan/文档/yLab/2-Midware/yDev/src/yDev.c",
+  "file": "/home/ryan/文档/yLab/2-Midware/yDev/src/yDev.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/2-Midware/yDev/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yDrv/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 2-Midware/yDev/CMakeFiles/yDev.dir/src/yDev_gpio.c.obj -c /home/ryan/文档/yLab/2-Midware/yDev/src/yDev_gpio.c",
+  "file": "/home/ryan/文档/yLab/2-Midware/yDev/src/yDev_gpio.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -I/home/ryan/文档/yLab/2-Midware/freeRTOS/inc -I/home/ryan/文档/yLab/2-Midware/freeRTOS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 2-Midware/freeRTOS/CMakeFiles/freeRTOS.dir/src/tasks.c.obj -c /home/ryan/文档/yLab/2-Midware/freeRTOS/src/tasks.c",
+  "file": "/home/ryan/文档/yLab/2-Midware/freeRTOS/src/tasks.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -I/home/ryan/文档/yLab/2-Midware/freeRTOS/inc -I/home/ryan/文档/yLab/2-Midware/freeRTOS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 2-Midware/freeRTOS/CMakeFiles/freeRTOS.dir/src/queue.c.obj -c /home/ryan/文档/yLab/2-Midware/freeRTOS/src/queue.c",
+  "file": "/home/ryan/文档/yLab/2-Midware/freeRTOS/src/queue.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -I/home/ryan/文档/yLab/2-Midware/freeRTOS/inc -I/home/ryan/文档/yLab/2-Midware/freeRTOS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 2-Midware/freeRTOS/CMakeFiles/freeRTOS.dir/src/list.c.obj -c /home/ryan/文档/yLab/2-Midware/freeRTOS/src/list.c",
+  "file": "/home/ryan/文档/yLab/2-Midware/freeRTOS/src/list.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -I/home/ryan/文档/yLab/2-Midware/freeRTOS/inc -I/home/ryan/文档/yLab/2-Midware/freeRTOS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 2-Midware/freeRTOS/CMakeFiles/freeRTOS.dir/src/timers.c.obj -c /home/ryan/文档/yLab/2-Midware/freeRTOS/src/timers.c",
+  "file": "/home/ryan/文档/yLab/2-Midware/freeRTOS/src/timers.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -I/home/ryan/文档/yLab/2-Midware/freeRTOS/inc -I/home/ryan/文档/yLab/2-Midware/freeRTOS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 2-Midware/freeRTOS/CMakeFiles/freeRTOS.dir/src/event_groups.c.obj -c /home/ryan/文档/yLab/2-Midware/freeRTOS/src/event_groups.c",
+  "file": "/home/ryan/文档/yLab/2-Midware/freeRTOS/src/event_groups.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -I/home/ryan/文档/yLab/2-Midware/freeRTOS/inc -I/home/ryan/文档/yLab/2-Midware/freeRTOS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 2-Midware/freeRTOS/CMakeFiles/freeRTOS.dir/src/stream_buffer.c.obj -c /home/ryan/文档/yLab/2-Midware/freeRTOS/src/stream_buffer.c",
+  "file": "/home/ryan/文档/yLab/2-Midware/freeRTOS/src/stream_buffer.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -I/home/ryan/文档/yLab/2-Midware/freeRTOS/inc -I/home/ryan/文档/yLab/2-Midware/freeRTOS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 2-Midware/freeRTOS/CMakeFiles/freeRTOS.dir/src/croutine.c.obj -c /home/ryan/文档/yLab/2-Midware/freeRTOS/src/croutine.c",
+  "file": "/home/ryan/文档/yLab/2-Midware/freeRTOS/src/croutine.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -I/home/ryan/文档/yLab/2-Midware/freeRTOS/inc -I/home/ryan/文档/yLab/2-Midware/freeRTOS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 2-Midware/freeRTOS/CMakeFiles/freeRTOS.dir/src/port.c.obj -c /home/ryan/文档/yLab/2-Midware/freeRTOS/src/port.c",
+  "file": "/home/ryan/文档/yLab/2-Midware/freeRTOS/src/port.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -I/home/ryan/文档/yLab/2-Midware/freeRTOS/inc -I/home/ryan/文档/yLab/2-Midware/freeRTOS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 2-Midware/freeRTOS/CMakeFiles/freeRTOS.dir/src/portasm.c.obj -c /home/ryan/文档/yLab/2-Midware/freeRTOS/src/portasm.c",
+  "file": "/home/ryan/文档/yLab/2-Midware/freeRTOS/src/portasm.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -I/home/ryan/文档/yLab/2-Midware/freeRTOS/inc -I/home/ryan/文档/yLab/2-Midware/freeRTOS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 2-Midware/freeRTOS/CMakeFiles/freeRTOS.dir/src/heap_4.c.obj -c /home/ryan/文档/yLab/2-Midware/freeRTOS/src/heap_4.c",
+  "file": "/home/ryan/文档/yLab/2-Midware/freeRTOS/src/heap_4.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/1-app/led -I/home/ryan/文档/yLab/1-app/led/inc -I/home/ryan/文档/yLab/2-Midware/yDev/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yDrv/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib -I/home/ryan/文档/yLab/2-Midware/freeRTOS/inc -I/home/ryan/文档/yLab/2-Midware/freeRTOS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 1-app/CMakeFiles/main.dir/main.c.obj -c /home/ryan/文档/yLab/1-app/main.c",
+  "file": "/home/ryan/文档/yLab/1-app/main.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/1-app/led -I/home/ryan/文档/yLab/1-app/led/inc -I/home/ryan/文档/yLab/2-Midware/yDev/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yDrv/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib -I/home/ryan/文档/yLab/2-Midware/freeRTOS/inc -I/home/ryan/文档/yLab/2-Midware/freeRTOS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 1-app/led/CMakeFiles/APP_Led.dir/src/blink.c.obj -c /home/ryan/文档/yLab/1-app/led/src/blink.c",
+  "file": "/home/ryan/文档/yLab/1-app/led/src/blink.c"
+},
+{
+  "directory": "/home/ryan/文档/yLab/build/Debug",
+  "command": "/usr/bin/arm-none-eabi-gcc -DSTM32G070xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER -I/home/ryan/文档/yLab/1-app/led -I/home/ryan/文档/yLab/1-app/led/inc -I/home/ryan/文档/yLab/2-Midware/yDev/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yDrv/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core -I/home/ryan/文档/yLab/3-ySTM32G0Platform/Core/CMSIS -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib/inc -I/home/ryan/文档/yLab/3-ySTM32G0Platform/yLib -I/home/ryan/文档/yLab/2-Midware/freeRTOS/inc -I/home/ryan/文档/yLab/2-Midware/freeRTOS  -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o 1-app/led/CMakeFiles/APP_Led.dir/src/switch.c.obj -c /home/ryan/文档/yLab/1-app/led/src/switch.c",
+  "file": "/home/ryan/文档/yLab/1-app/led/src/switch.c"
+}
+]

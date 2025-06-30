@@ -1,0 +1,204 @@
+{
+	"archive" : {},
+	"artifacts" : 
+	[
+		{
+			"path" : "3-ySTM32G0Platform/Core/libCore.a"
+		}
+	],
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_library",
+			"target_compile_definitions",
+			"target_link_libraries"
+		],
+		"files" : 
+		[
+			"3-ySTM32G0Platform/Core/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 47,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 53,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 61,
+				"parent" : 0
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : " -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3"
+				},
+				{
+					"fragment" : "-std=gnu11"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 2,
+					"define" : "STM32G070xx"
+				},
+				{
+					"backtrace" : 2,
+					"define" : "USE_FULL_LL_DRIVER"
+				},
+				{
+					"backtrace" : 2,
+					"define" : "USE_HAL_DRIVER"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 3,
+					"path" : "/home/ryan/\u6587\u6863/yLab/3-ySTM32G0Platform/Core"
+				},
+				{
+					"backtrace" : 3,
+					"path" : "/home/ryan/\u6587\u6863/yLab/3-ySTM32G0Platform/Core/CMSIS"
+				},
+				{
+					"backtrace" : 3,
+					"path" : "/home/ryan/\u6587\u6863/yLab/3-ySTM32G0Platform/fwlib"
+				},
+				{
+					"backtrace" : 3,
+					"path" : "/home/ryan/\u6587\u6863/yLab/3-ySTM32G0Platform/fwlib/Inc"
+				},
+				{
+					"backtrace" : 3,
+					"path" : "/home/ryan/\u6587\u6863/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy"
+				}
+			],
+			"language" : "C",
+			"languageStandard" : 
+			{
+				"backtraces" : 
+				[
+					1
+				],
+				"standard" : "11"
+			},
+			"sourceIndexes" : 
+			[
+				0
+			]
+		},
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : " -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -mcpu=cortex-m0plus  -x assembler-with-cpp -MMD -MP -g"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 2,
+					"define" : "STM32G070xx"
+				},
+				{
+					"backtrace" : 2,
+					"define" : "USE_FULL_LL_DRIVER"
+				},
+				{
+					"backtrace" : 2,
+					"define" : "USE_HAL_DRIVER"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 3,
+					"path" : "/home/ryan/\u6587\u6863/yLab/3-ySTM32G0Platform/Core"
+				},
+				{
+					"backtrace" : 3,
+					"path" : "/home/ryan/\u6587\u6863/yLab/3-ySTM32G0Platform/Core/CMSIS"
+				},
+				{
+					"backtrace" : 3,
+					"path" : "/home/ryan/\u6587\u6863/yLab/3-ySTM32G0Platform/fwlib"
+				},
+				{
+					"backtrace" : 3,
+					"path" : "/home/ryan/\u6587\u6863/yLab/3-ySTM32G0Platform/fwlib/Inc"
+				},
+				{
+					"backtrace" : 3,
+					"path" : "/home/ryan/\u6587\u6863/yLab/3-ySTM32G0Platform/fwlib/Inc/Legacy"
+				}
+			],
+			"language" : "ASM",
+			"sourceIndexes" : 
+			[
+				1
+			]
+		}
+	],
+	"id" : "Core::@660b6ae374ec1266547c",
+	"name" : "Core",
+	"nameOnDisk" : "libCore.a",
+	"paths" : 
+	{
+		"build" : "3-ySTM32G0Platform/Core",
+		"source" : "3-ySTM32G0Platform/Core"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		},
+		{
+			"name" : "",
+			"sourceIndexes" : 
+			[
+				1
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "3-ySTM32G0Platform/Core/system_stm32g0xx.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 1,
+			"path" : "3-ySTM32G0Platform/Core/startup_stm32g070xx.s",
+			"sourceGroupIndex" : 1
+		}
+	],
+	"type" : "STATIC_LIBRARY"
+}
