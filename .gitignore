@@ -56,3 +56,6 @@ dkms.conf
 
 #build文件
 build/
+
+#build文件
+.vscode/

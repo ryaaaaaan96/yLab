@@ -59,11 +59,11 @@ extern "C"
     typedef enum
     {
         YDEV_TYPE_START = 0, // GPIO设备
-        YDEV_TYPE_GPIO, // GPIO设备
-        YDEV_TYPE_USART,    // 串口设备
-        YDEV_TYPE_SPI,      // SPI设备
-        YDEV_TYPE_IIC,      // IIC设备
-        YDEV_TYPE_MAX       // 定时器设备
+        YDEV_TYPE_GPIO,      // GPIO设备
+        YDEV_TYPE_USART,     // 串口设备
+        YDEV_TYPE_SPI,       // SPI设备
+        YDEV_TYPE_IIC,       // IIC设备
+        YDEV_TYPE_MAX        // 定时器设备
     } yDevType_t;
 
     /**
@@ -177,14 +177,6 @@ extern "C"
 #define YDEV_IOCTL_GET_STATUS (YDEV_IOCTL_BASE + 0)
 #define YDEV_IOCTL_RESET (YDEV_IOCTL_BASE + 1)
 
-/**
- * @brief GPIO设备IOCTL命令
- */
-#define YDEV_GPIO_IOCTL_BASE 0x8100
-#define YDEV_GPIO_SET_PIN (YDEV_GPIO_IOCTL_BASE + 0)
-#define YDEV_GPIO_CLEAR_PIN (YDEV_GPIO_IOCTL_BASE + 1)
-#define YDEV_GPIO_TOGGLE_PIN (YDEV_GPIO_IOCTL_BASE + 2)
-#define YDEV_GPIO_GET_PIN (YDEV_GPIO_IOCTL_BASE + 3)
 
     // ==================== 核心API函数 ====================
 

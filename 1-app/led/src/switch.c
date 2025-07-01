@@ -5,28 +5,65 @@
  * @date 2025
  * @author YLab Development Team
  */
-
-#include "switch.h"
 #include <string.h>
+#include "FreeRTOS.h"
+#include "task.h"
+#include "switch.h"
 
 // ==================== 静态变量 ====================
 
-static struct
-{
-    yDevConfig_Gpio_t config;
-    yDevHandle_Gpio_t handle;
-} led[SWITCH_TYPE_MAX] = {
+static yDevConfig_Gpio_t switch_config[SWITCH_TYPE_MAX] = {
     [SWITCH_TYPE_LED] = {
-        .config = {
-            .base = {
-                .type = YDEV_TYPE_GPIO},
-            .drv_config = {
-                .pin = YDRV_PINC8,
-                .mode = YDRV_GPIO_MODE_OUTPUT_OD,
-                .pupd = YDRV_GPIO_PUPD_NONE,
-                .speed = YDRV_GPIO_SPEED_LOW,
-            }},
-        .handle = {.base = {0}, .drv_handle = {0}}}};
+        .base = {
+            .type = YDEV_TYPE_GPIO,
+        },
+        .drv_config = {
+            .pin = YDRV_PINC8,
+            .mode = YDRV_GPIO_MODE_OUTPUT_OD,
+            .pupd = YDRV_GPIO_PUPD_NONE,
+            .speed = YDRV_GPIO_SPEED_LOW,
+        },
+    },
+    [SWITCH_TYPE_BUTTON] = {
+        .base = {
+            .type = YDEV_TYPE_GPIO,
+        },
+        .drv_config = {
+            .pin = YDRV_PINC0,
+            .mode = YDRV_GPIO_MODE_INPUT,
+            .pupd = YDRV_GPIO_PUPD_PULLUP,
+            .speed = YDRV_GPIO_SPEED_HIGH,
+        },
+    },
+};
+
+static yDevHandle_Gpio_t switch_handle[SWITCH_TYPE_MAX] =
+    {
+        [SWITCH_TYPE_LED] =
+            {
+                .base = {0},
+                .drv_handle = {0},
+            },
+        [SWITCH_TYPE_BUTTON] =
+            {
+                .base = {0},
+                .drv_handle = {0},
+            },
+};
+
+static uint32_t log_flag;
+static uint32_t log_time;
+
+static void button_log(void *arg);
+
+static yDrvGpioExit_t button_exit =
+    {
+        .trigger = YDRV_EXTI_TRIGGER_FALLING,
+        .prio = 1,
+        .arg = &switch_handle[SWITCH_TYPE_BUTTON],
+        .function = button_log,
+        .enable = 1,
+};
 
 // ==================== 公共API实现 ====================
 
@@ -35,14 +72,19 @@ static struct
  */
 void SwitchInit(void)
 {
-    // 初始化LED设备
-    yDevInitStatic(&led[SWITCH_TYPE_LED].config, &led[SWITCH_TYPE_LED].handle);
+    // 初始化开关模块变量
+    log_flag = 0;
+    log_time = 0;
+    yDevInitStatic(&switch_config[SWITCH_TYPE_LED], &switch_handle[SWITCH_TYPE_LED]);
+    yDevInitStatic(&switch_config[SWITCH_TYPE_BUTTON], &switch_handle[SWITCH_TYPE_BUTTON]);
+
+    yDevIoctl(&switch_handle[SWITCH_TYPE_BUTTON], YDEV_GPIO_REGISTER_EXIT, &button_exit);
 }
 
 /**
  * @brief 开关控制函数
  * @param type 开关类型
- * @param st 开关状态 (0=关闭, 非0=开启)
+ * @param st 开关状态 (0=关闭, 1=开启, 其他=翻转)
  */
 void SwitchCtrl(usrSwitchType_t type, uint32_t st)
 {
@@ -53,16 +95,61 @@ void SwitchCtrl(usrSwitchType_t type, uint32_t st)
     case 0:
         // 关
         gpio_state = 0;
-        yDevWrite(&led[type].handle, &gpio_state, sizeof(gpio_state));
+        yDevWrite(&switch_handle[type], &gpio_state, sizeof(gpio_state));
         break;
     case 1:
         // 开
         gpio_state = 1;
-        yDevWrite(&led[type].handle, &gpio_state, sizeof(gpio_state));
+        yDevWrite(&switch_handle[type], &gpio_state, sizeof(gpio_state));
         break;
     default:
         // 翻转
-        yDevIoctl(&led[type].handle, YDEV_GPIO_TOGGLE_PIN, NULL);
+        yDevIoctl(&switch_handle[type], YDEV_GPIO_TOGGLE_PIN, NULL);
         break;
     }
+}
+
+/**
+ * @brief 开关状态读取函数
+ * @param type 开关类型
+ * @return 开关状态 (0=关闭, 非0=开启)
+ */
+uint32_t SwitchRead(usrSwitchType_t type)
+{
+    uint32_t gpio_state;
+    yDevRead(&switch_handle[type], &gpio_state, sizeof(gpio_state));
+    return gpio_state;
+}
+
+/**
+ * @brief 获取按键按下日志计数
+ * @return 按键连续按下次数
+ */
+uint32_t SwitchGetLog(void)
+{
+    return log_flag;
+}
+
+/**
+ * @brief 按键中断回调函数
+ * @param arg 回调参数（未使用）
+ *
+ * @par 功能描述:
+ * 按键中断服务函数，统计1.5秒内的按键按下次数
+ * 用于实现不同的LED控制模式
+ */
+static void button_log(void *arg)
+{
+    (void)arg;
+    TickType_t nowtime = xTaskGetTickCountFromISR();
+    if (pdTICKS_TO_MS(nowtime - log_time) < 1500)
+    {
+        log_flag++;
+    }
+    else
+    {
+        log_flag = 0;
+    }
+
+    log_time = nowtime;
 }

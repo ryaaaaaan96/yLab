@@ -43,10 +43,10 @@ extern "C"
      */
     typedef enum
     {
-        YDRV_GPIO_MODE_INPUT = 0,   // 输入模式
-        YDRV_GPIO_MODE_OUTPUT_PP,   // 输出模式
-        YDRV_GPIO_MODE_OUTPUT_OD,   // 输出模式
-        YDRV_GPIO_MODE_ANALOG // 模拟模式
+        YDRV_GPIO_MODE_INPUT = 0, // 输入模式
+        YDRV_GPIO_MODE_OUTPUT_PP, // 输出模式
+        YDRV_GPIO_MODE_OUTPUT_OD, // 输出模式
+        YDRV_GPIO_MODE_ANALOG     // 模拟模式
     } yDrvGpioMode_t;
 
     /**
@@ -84,8 +84,8 @@ extern "C"
      */
     typedef enum
     {
-        YDRV_EXTI_TRIGGER_RISING = 1,    // 上升沿触发
-        YDRV_EXTI_TRIGGER_FALLING = 2,   // 下降沿触发
+        YDRV_EXTI_TRIGGER_RISING = 1,        // 上升沿触发
+        YDRV_EXTI_TRIGGER_FALLING = 2,       // 下降沿触发
         YDRV_EXTI_TRIGGER_RISING_FALLING = 3 // 双沿触发
     } yDrvExtiTrigger_t;
 
@@ -109,8 +109,8 @@ extern "C"
     {
         GPIO_TypeDef *port; // GPIO端口指针
         uint32_t pin;       // GPIO引脚位掩码
-        IRQn_Type IRQ;      // 
-        uint8_t pinNumber; // GPIO引脚编号(0-15)
+        IRQn_Type IRQ;      //
+        uint8_t pinNumber;  // GPIO引脚编号(0-15)
     } yDrvGpioHandle_t;
 
     /**
@@ -122,6 +122,7 @@ extern "C"
         uint32_t prio;
         void (*function)(void *para); // 回调函数指针
         void *arg;                    // 回调函数参数
+        uint32_t enable;
     } yDrvGpioExit_t;
 
     // ==================== GPIO基础函数 ====================

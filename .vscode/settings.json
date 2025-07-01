@@ -98,6 +98,7 @@
         "stm32g0xx_ll_system.h": "c",
         "mpu_wrappers.h": "c",
         "freertos.h": "c",
-        "task.h": "c"
+        "task.h": "c",
+        "compare": "c"
     }
 }

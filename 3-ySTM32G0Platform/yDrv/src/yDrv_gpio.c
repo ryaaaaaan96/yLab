@@ -292,6 +292,11 @@ yDrvStatus_t yDrvGpioRegisterCallback(yDrvGpioHandle_t *handle,
         return YDRV_INVALID_PARAM;
     }
 
+    if (yDrv_Gpio_Exit_Source_Set(handle) != YDRV_OK)
+    {
+        return YDRV_ERROR;
+    }
+
     EXTI_InitStruct.Line_0_31 = handle->pin;
     EXTI_InitStruct.LineCommand = ENABLE;
     switch (exit->trigger)
@@ -324,7 +329,7 @@ yDrvStatus_t yDrvGpioRegisterCallback(yDrvGpioHandle_t *handle,
         return YDRV_INVALID_PARAM;
     }
 
-    if (LL_EXTI_Init(&EXTI_InitStruct) == 0)
+    if (LL_EXTI_Init(&EXTI_InitStruct) != 0)
     {
         return YDRV_ERROR;
     }
@@ -336,9 +341,12 @@ yDrvStatus_t yDrvGpioRegisterCallback(yDrvGpioHandle_t *handle,
     }
 
     NVIC_SetPriority(handle->IRQ, exit->prio);
-    NVIC_EnableIRQ(handle->IRQ);
+    if (exit->enable == 1)
+    {
+        NVIC_EnableIRQ(handle->IRQ);
+    }
 
-    return YDRV_OK;
+        return YDRV_OK;
 }
 
 yDrvStatus_t yDrvGpioUnregisterCallback(yDrvGpioHandle_t *handle, yDrvExtiTrigger_t trigger)
