@@ -117,6 +117,12 @@ void SwitchCtrl(usrSwitchType_t type, uint32_t st)
 uint32_t SwitchRead(usrSwitchType_t type)
 {
     uint32_t gpio_state;
+    TickType_t nowtime = xTaskGetTickCount();
+    if (pdTICKS_TO_MS(nowtime - log_time) < 1500)
+    {
+        return 0;
+    }
+
     yDevRead(&switch_handle[type], &gpio_state, sizeof(gpio_state));
     return gpio_state;
 }
@@ -150,6 +156,6 @@ static void button_log(void *arg)
     {
         log_flag = 0;
     }
-
+    log_flag = log_flag > 3 ? 3 : log_flag;
     log_time = nowtime;
 }
