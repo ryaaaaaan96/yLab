@@ -55,4 +55,4 @@ dkms.conf
 *.dwo
 
 #build文件
-# build/
+build/
