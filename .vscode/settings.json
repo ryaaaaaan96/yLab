@@ -100,5 +100,11 @@
         "freertos.h": "c",
         "task.h": "c",
         "compare": "c"
+    },
+    "files.autoSave": "onFocusChange",
+    "editor.wordWrap": "wordWrapColumn",
+    "cmake.environment": 
+    {
+        "PATH": "D:/CODE/msys64/ucrt64/bin"
     }
 }

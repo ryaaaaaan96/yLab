@@ -19,12 +19,20 @@ set(TOOLCHAIN_PREFIX                arm-none-eabi-)
 # ============================================================================
 # 编译器和工具设置
 # ============================================================================
-set(CMAKE_C_COMPILER                ${TOOLCHAIN_PREFIX}gcc)      # C编译器
-set(CMAKE_ASM_COMPILER              ${CMAKE_C_COMPILER})        # 汇编编译器（使用GCC）
-set(CMAKE_CXX_COMPILER              ${TOOLCHAIN_PREFIX}g++)     # C++编译器
-set(CMAKE_LINKER                    ${TOOLCHAIN_PREFIX}g++)     # 链接器
-set(CMAKE_OBJCOPY                   ${TOOLCHAIN_PREFIX}objcopy) # 目标文件转换工具
-set(CMAKE_SIZE                      ${TOOLCHAIN_PREFIX}size)    # 文件大小分析工具
+# 可执行文件后缀（Windows需要.exe，Linux不需要）
+if(WIN32)
+    set(EXE_SUFFIX ".exe")
+else()
+    set(EXE_SUFFIX "")
+endif()
+
+set(CMAKE_C_COMPILER                ${TOOLCHAIN_PREFIX}gcc${EXE_SUFFIX})      # C编译器
+set(CMAKE_ASM_COMPILER              ${CMAKE_C_COMPILER})                        # 汇编编译器
+set(CMAKE_CXX_COMPILER              ${TOOLCHAIN_PREFIX}g++${EXE_SUFFIX})      # C++编译器
+set(CMAKE_LINKER                    ${TOOLCHAIN_PREFIX}g++${EXE_SUFFIX})      # 链接器
+set(CMAKE_OBJCOPY                   ${TOOLCHAIN_PREFIX}objcopy${EXE_SUFFIX}) # 目标文件转换工具
+set(CMAKE_SIZE                      ${TOOLCHAIN_PREFIX}size${EXE_SUFFIX})    # 文件大小分析工具
+
 
 # ============================================================================
 # 可执行文件后缀配置

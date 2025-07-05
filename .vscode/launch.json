@@ -1,32 +1,45 @@
 {
-    // 使用 IntelliSense 了解相关属性。 
-    // 悬停以查看现有属性的描述。
-    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        {
-            "name": "Debug STM32G0 (ST-Link)",
-            "type": "cortex-debug",
-            "request": "launch",
-            "servertype": "openocd",
-            "cwd": "${workspaceFolder}",
-            "executable": "${workspaceFolder}/build/Debug/YLab_STM32G0_Template.elf",
-            "device": "STM32G070RB",
-            "configFiles": [
-                "interface/stlink.cfg",
-                "target/stm32g0x.cfg"
-            ],
-            "runToEntryPoint": "Reset_Handler",
-            "showDevDebugOutput": "parsed",
-            "armToolchainPath": "/usr/bin",
-            "gdbPath": "gdb-multiarch",
-            "preLaunchCommands": [
-                "monitor halt",
-                "monitor reset halt"
-            ],
-            "postLaunchCommands": [
-                "monitor reset run"
-            ]
-        }
+      {
+        "name": "CMSIS Debug (OpenOCD)",
+        "type": "gdbtarget",
+        "request": "launch",
+        "program": "${workspaceFolder}/build/Debug/YLab_STM32G0_Template.elf",
+        "gdb": "gdb-multiarch",
+        "environment": {
+            "PATH": "D:/CODE/msys64/ucrt64/bin"
+        },
+        "gdbAsync": true,
+        "gdbNonStop": false,
+        "verbose": false,
+        "logFile": "E:/yLab2.0/build/Debug/log.txt",
+        "target": {
+          "type": "remote",
+          "server": "openocd",
+          "serverParameters": [
+            "-f", "interface/stlink.cfg",
+            "-f", "target/stm32g0x.cfg",  // 修正为STM32G0芯片配置
+            "-c", "gdb_port 3333"
+          ],
+          "environment": {
+            "PATH": "D:/CODE/msys64/ucrt64/bin"
+        },
+          "host": "localhost",
+          "port": "3333",
+          "automaticallyKillServer": true
+        },
+        "preRunCommands": [
+          "set mem inaccessible-by-default off",
+          "set architecture arm",
+          "set endian little"
+        ],
+        "initCommands": [
+          "target extended-remote localhost:3333",
+          "monitor reset halt",
+          "load",
+          "monitor reset init"
+        ]
+      }
     ]
 }
