@@ -147,10 +147,19 @@ static int32_t yDev_Usart_Read(void *handle, void *buffer, uint16_t size)
         return -1;
     }
 
+    usart_handle->base.errno &= (~YDEV_USART_ERRNO_ORE);
     start_time = yDevGetTimeMS();
     // 循环读取数据，直到读取完成或没有更多数据
     while (read_count < size)
     {
+        if (yDrvUsartGetFlagORE(&usart_handle->drv_handle) == 1)
+        {
+            /* Clear Overrun Error flag*/
+            yDrvUsartResetFlagORE(&usart_handle->drv_handle);
+            usart_handle->base.errno = YDEV_USART_ERRNO_ORE;
+            return read_count;
+        }
+
         read_res = yDrvUsartReadByte(&usart_handle->drv_handle,
                                      read_buff);
         read_count += read_res;
@@ -189,7 +198,7 @@ static int32_t yDev_Usart_Write(void *handle, const void *buffer, uint16_t size)
     write_count = 0;
     write_buff = buffer;
 
-    if (yDrvUsartHandleIsValid(&usart_handle->drv_handle))
+    if (yDrvUsartHandleIsValid(&usart_handle->drv_handle) != YDRV_OK)
     {
         return -1;
     }

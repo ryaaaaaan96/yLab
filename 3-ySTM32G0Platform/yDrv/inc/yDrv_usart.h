@@ -134,25 +134,24 @@ extern "C"
  * @brief USART配置结构体默认初始化宏
  * @note 提供最常用的默认配置，适用于标准UART通信
  */
-#define YDRV_USART_CONFIG_DEFAULT()                \
-    ((yDrvUsartConfig_t)                           \
-    {                                              \
-        .usartId = YDRV_USART_MAX,                 \
-        .txPin = YDRV_PIN_NULL,                    \
-        .rxPin = YDRV_PIN_NULL,                    \
-        .rtsPin = YDRV_PIN_NULL,                   \
-        .ctsPin = YDRV_PIN_NULL,                   \
-        .baudRate = 115200,                        \
-        .dataBits = YDRV_USART_DATA_8BIT,          \
-        .stopBits = YDRV_USART_STOP_1BIT,          \
-        .parity = YDRV_USART_PARITY_NONE,          \
-        .direction = YDRV_USART_DIR_TX_RX,         \
-        .flowControl = YDRV_USART_FLOW_NONE,       \
-        .mode = YDRV_USART_MODE_ASYNCHRONOUS,      \
-        .txAF = 0,                                 \
-        .rxAF = 0,                                 \
-        .ctsAF = 0,                                \
-        .rtsAF = 0,                                \
+#define YDRV_USART_CONFIG_DEFAULT()           \
+    ((yDrvUsartConfig_t){                     \
+        .usartId = YDRV_USART_MAX,            \
+        .txPin = YDRV_PIN_NULL,               \
+        .rxPin = YDRV_PIN_NULL,               \
+        .rtsPin = YDRV_PIN_NULL,              \
+        .ctsPin = YDRV_PIN_NULL,              \
+        .baudRate = 115200,                   \
+        .dataBits = YDRV_USART_DATA_8BIT,     \
+        .stopBits = YDRV_USART_STOP_1BIT,     \
+        .parity = YDRV_USART_PARITY_NONE,     \
+        .direction = YDRV_USART_DIR_TX_RX,    \
+        .flowControl = YDRV_USART_FLOW_NONE,  \
+        .mode = YDRV_USART_MODE_ASYNCHRONOUS, \
+        .txAF = 0,                            \
+        .rxAF = 0,                            \
+        .ctsAF = 0,                           \
+        .rtsAF = 0,                           \
     })
 
     // ==================== USART句柄结构体 ====================
@@ -174,17 +173,16 @@ extern "C"
  * @brief USART句柄结构体默认初始化宏
  * @note 提供安全的默认初始化值
  */
-#define YDRV_USART_HANDLE_DEFAULT()                \
-    ((yDrvUsartHandle_t)                           \
-    {                                              \
-        .instance = NULL,                          \
-        .IRQ = (IRQn_Type)0,                       \
-        .usartId = YDRV_USART_MAX,                 \
-        .txPinInfo = {NULL, 0},                    \
-        .rxPinInfo = {NULL, 0},                    \
-        .rtsPinInfo = {NULL, 0},                   \
-        .ctsPinInfo = {NULL, 0},                   \
-        .flagBtyeSend = 0,                         \
+#define YDRV_USART_HANDLE_DEFAULT() \
+    ((yDrvUsartHandle_t){           \
+        .instance = NULL,           \
+        .IRQ = (IRQn_Type)0,        \
+        .usartId = YDRV_USART_MAX,  \
+        .txPinInfo = {NULL, 0},     \
+        .rxPinInfo = {NULL, 0},     \
+        .rtsPinInfo = {NULL, 0},    \
+        .ctsPinInfo = {NULL, 0},    \
+        .flagBtyeSend = 0,          \
     })
 
     // ==================== USART中断管理 ====================
@@ -219,14 +217,13 @@ extern "C"
  * @brief USART中断配置结构体默认初始化宏
  * @note 提供安全的默认中断配置
  */
-#define YDRV_USART_EXTI_CONFIG_DEFAULT()           \
-    ((yDrvUsartExtiConfig_t)                       \
-    {                                              \
-        .trigger = YDRV_USART_EXTI_MAX,            \
-        .prio = 0,                                 \
-        .function = NULL,                          \
-        .arg = NULL,                               \
-        .enable = 0,                               \
+#define YDRV_USART_EXTI_CONFIG_DEFAULT() \
+    ((yDrvUsartExtiConfig_t){            \
+        .trigger = YDRV_USART_EXTI_MAX,  \
+        .prio = 0,                       \
+        .function = NULL,                \
+        .arg = NULL,                     \
+        .enable = 0,                     \
     })
 
     // ==================== USART基础函数 ====================
@@ -479,6 +476,30 @@ extern "C"
      */
     yDrvStatus_t yDrvUsartUnregisterCallback(yDrvUsartHandle_t *handle,
                                              yDrvUsartExti_t type);
+
+    /**
+     * @brief 获取USART溢出错误标志状态（内联优化）
+     * @param handle USART句柄指针
+     * @retval 1 溢出错误标志已设置
+     * @retval 0 溢出错误标志未设置
+     * @note 溢出错误发生在接收器无法及时处理接收到的数据时
+     */
+    YLIB_INLINE uint32_t yDrvUsartGetFlagORE(yDrvUsartHandle_t *handle)
+    {
+        return LL_USART_IsActiveFlag_ORE(handle->instance);
+    }
+
+    /**
+     * @brief 获取USART溢出错误标志状态（内联优化）
+     * @param handle USART句柄指针
+     * @retval 1 溢出错误标志已设置
+     * @retval 0 溢出错误标志未设置
+     * @note 溢出错误发生在接收器无法及时处理接收到的数据时
+     */
+    YLIB_INLINE void yDrvUsartResetFlagORE(yDrvUsartHandle_t *handle)
+    {
+        LL_USART_ClearFlag_ORE(handle->instance);
+    }
 
 #ifdef __cplusplus
 }

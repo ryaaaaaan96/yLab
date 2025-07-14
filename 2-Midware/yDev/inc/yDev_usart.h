@@ -61,8 +61,7 @@ extern "C"
  * @note 提供最常用的默认配置，适用于标准UART通信
  */
 #define YDEV_USART_CONFIG_DEFAULT()                \
-    ((yDevConfig_Usart_t)                         \
-    {                                              \
+    ((yDevConfig_Usart_t){                         \
         .base = YDEV_CONFIG_DEFAULT(),             \
         .drv_config = YDRV_USART_CONFIG_DEFAULT(), \
     })
@@ -72,8 +71,7 @@ extern "C"
  * @note 提供安全的默认初始化值
  */
 #define YDEV_USART_HANDLE_DEFAULT()                \
-    ((yDevHandle_Usart_t)                         \
-    {                                              \
+    ((yDevHandle_Usart_t){                         \
         .base = YDEV_HANDLE_DEFAULT(),             \
         .drv_handle = YDRV_USART_HANDLE_DEFAULT(), \
     })
@@ -113,6 +111,28 @@ extern "C"
 #define YDEV_USART_IOCTL_ENABLE_IRQ (YDEV_USART_IOCTL_BASE + 10)      /**< 使能中断 */
 #define YDEV_USART_IOCTL_DISABLE_IRQ (YDEV_USART_IOCTL_BASE + 11)     /**< 禁用中断 */
 #define YDEV_USART_IOCTL_GET_STATUS (YDEV_USART_IOCTL_BASE + 12)      /**< 获取状态 */
+
+    // ==================== USART错误代码定义 ====================
+
+    /**
+     * @brief USART错误代码定义
+     * @note 这些错误代码用于标识USART通信过程中可能出现的各种错误情况
+     * @note 错误代码采用位掩码方式定义，可以进行位运算组合
+     */
+
+#define YDEV_USART_ERRNO_NONE (0UL)                 // 无错误
+#define YDEV_USART_ERRNO_ORE (1UL << (0))           // 溢出错误 (Overrun Error)
+#define YDEV_USART_ERRNO_PE (1UL << (1))            // 奇偶校验错误 (Parity Error)
+#define YDEV_USART_ERRNO_FE (1UL << (2))            // 帧错误 (Frame Error)
+#define YDEV_USART_ERRNO_NE (1UL << (3))            // 噪声错误 (Noise Error)
+#define YDEV_USART_ERRNO_IDLE (1UL << (4))          // 空闲线检测 (IDLE Line Detection)
+#define YDEV_USART_ERRNO_BREAK (1UL << (5))         // 断路检测错误 (Break Detection)
+#define YDEV_USART_ERRNO_DMA (1UL << (6))           // DMA传输错误
+#define YDEV_USART_ERRNO_TIMEOUT (1UL << (7))       // 超时错误
+#define YDEV_USART_ERRNO_BUFFER_FULL (1UL << (8))   // 缓冲区满错误
+#define YDEV_USART_ERRNO_INVALID_PARAM (1UL << (9)) // 无效参数错误
+#define YDEV_USART_ERRNO_NOT_INIT (1UL << (10))     // 设备未初始化错误
+#define YDEV_USART_ERRNO_BUSY (1UL << (11))         // 设备忙错误
 
 #ifdef __cplusplus
 }

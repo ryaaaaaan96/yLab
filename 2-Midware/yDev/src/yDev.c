@@ -68,8 +68,7 @@ static size_t ydev_time_ms;
  * @par 功能描述:
  * 初始化yLab系统，包括底层驱动初始化
  */
-yDevStatus_t
-yLabInit(void)
+yDevStatus_t yLabInit(void)
 {
     // 初始化底层驱动
     yDrvInit();

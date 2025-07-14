@@ -167,7 +167,7 @@ extern "C"
     {
         uint32_t index;
         uint32_t timeOutMs;
-
+        uint32_t errno;
         // void *mutex; // 互斥锁（可选）
     } yDevHandle_t;
 
