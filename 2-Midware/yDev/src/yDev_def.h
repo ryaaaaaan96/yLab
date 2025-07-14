@@ -55,6 +55,22 @@ extern "C"
             .write = _write,                                                 \
             .ioctl = _ioctl};
 
+    // extern size_t ydev_time_ms;
+
+    /**
+     * @brief 初始化yDev配置结构体为默认值
+     * @param config 配置结构体指针
+     * @retval 无
+     */
+    void yDevConfigStructInit(yDevConfig_t *config);
+
+    /**
+     * @brief 初始化yDev句柄结构体为默认值
+     * @param handle 句柄结构体指针
+     * @retval 无
+     */
+    void yDevHandleStructInit(yDevHandle_t *handle);
+
 #ifdef __cplusplus
 }
 #endif

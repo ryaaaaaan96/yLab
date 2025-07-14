@@ -54,10 +54,10 @@ extern "C"
      */
     typedef enum
     {
-        YDRV_GPIO_SPEED_LOW = 0,  // 低速 (2MHz)
-        YDRV_GPIO_SPEED_MEDIUM,   // 中速 (25MHz)
-        YDRV_GPIO_SPEED_HIGH,     // 高速 (50MHz)
-        YDRV_GPIO_SPEED_VERY_HIGH // 极高速 (100MHz)
+        YDRV_GPIO_SPEED_LEVEL0 = LL_GPIO_SPEED_FREQ_LOW,      // 低速 (2MHz)
+        YDRV_GPIO_SPEED_LEVEL1 = LL_GPIO_SPEED_FREQ_MEDIUM,   // 中速 (25MHz)
+        YDRV_GPIO_SPEED_LEVEL2 = LL_GPIO_SPEED_FREQ_HIGH,     // 高速 (50MHz)
+        YDRV_GPIO_SPEED_LEVEL3 = LL_GPIO_SPEED_FREQ_VERY_HIGH // 极高速 (100MHz)
     } yDrvGpioSpeed_t;
 
     /**
@@ -65,9 +65,9 @@ extern "C"
      */
     typedef enum
     {
-        YDRV_GPIO_PUPD_NONE = 0, // 无上下拉
-        YDRV_GPIO_PUPD_PULLUP,   // 上拉
-        YDRV_GPIO_PUPD_PULLDOWN  // 下拉
+        YDRV_GPIO_PUPD_NONE = LL_GPIO_PULL_NO,      // 无上下拉
+        YDRV_GPIO_PUPD_PULLUP = LL_GPIO_PULL_UP,    // 上拉
+        YDRV_GPIO_PUPD_PULLDOWN = LL_GPIO_PULL_DOWN // 下拉
     } yDrvGpioPuPd_t;
 
     /**
@@ -84,10 +84,10 @@ extern "C"
      */
     typedef enum
     {
-        YDRV_EXTI_TRIGGER_RISING = 1,        // 上升沿触发
-        YDRV_EXTI_TRIGGER_FALLING = 2,       // 下降沿触发
-        YDRV_EXTI_TRIGGER_RISING_FALLING = 3 // 双沿触发
-    } yDrvExtiTrigger_t;
+        YDRV_GPIO_EXTI_TRIGGER_RISING = 1,        // 上升沿触发
+        YDRV_GPIO_EXTI_TRIGGER_FALLING = 2,       // 下降沿触发
+        YDRV_GPIO_EXTI_TRIGGER_RISING_FALLING = 3 // 双沿触发
+    } yDrvGpioExti_t;
 
     // ==================== GPIO配置结构体 ====================
 
@@ -102,29 +102,61 @@ extern "C"
         yDrvGpioPuPd_t pupd;   // 上下拉配置
     } yDrvGpioConfig_t;
 
+/**
+ * @brief GPIO配置结构体默认初始化宏
+ * @note 提供最常用的默认配置，适用于输入模式
+ */
+#define YDRV_GPIO_CONFIG_DEFAULT()                 \
+    ((yDrvGpioConfig_t)                            \
+    {                                              \
+        .pin = YDRV_PIN_NULL,                      \
+        .mode = YDRV_GPIO_MODE_INPUT,              \
+        .speed = YDRV_GPIO_SPEED_LEVEL0,           \
+        .pupd = YDRV_GPIO_PUPD_NONE,               \
+    })
+
     /**
      * @brief GPIO句柄结构体
      */
     typedef struct
     {
-        GPIO_TypeDef *port; // GPIO端口指针
-        uint32_t pin;       // GPIO引脚位掩码
-        IRQn_Type IRQ;      //
-        uint8_t pinNumber;  // GPIO引脚编号(0-15)
+        yDrvGpioInfo_t gpioInfo;
+        IRQn_Type IRQ;
     } yDrvGpioHandle_t;
-
+/**
+ * @brief GPIO句柄结构体默认初始化宏
+ * @note 提供安全的默认初始化值
+ */
+#define YDRV_GPIO_HANDLE_DEFAULT()                 \
+    ((yDrvGpioHandle_t)                            \
+    {                                              \
+        .gpioInfo = {NULL, 0, 0, 0},               \
+        .IRQ = (IRQn_Type)0,                       \
+    })
     /**
-     * @brief EXIT句柄结构体
+     * @brief EXIT配置句柄结构体
      */
     typedef struct
     {
-        yDrvExtiTrigger_t trigger;
+        yDrvGpioExti_t trigger;
         uint32_t prio;
         void (*function)(void *para); // 回调函数指针
         void *arg;                    // 回调函数参数
         uint32_t enable;
-    } yDrvGpioExit_t;
-
+    } yDrvGpioExtiConfig_t;
+/**
+ * @brief GPIO中断配置结构体默认初始化宏
+ * @note 提供安全的默认中断配置
+ */
+#define YDRV_GPIO_EXTI_CONFIG_DEFAULT()            \
+    ((yDrvGpioExtiConfig_t)                        \
+    {                                              \
+        .trigger = YDRV_GPIO_EXTI_TRIGGER_RISING,  \
+        .prio = 0,                                 \
+        .function = NULL,                          \
+        .arg = NULL,                               \
+        .enable = 0,                               \
+    })
     // ==================== GPIO基础函数 ====================
 
     /**
@@ -141,6 +173,27 @@ extern "C"
      * @retval yDrv状态
      */
     yDrvStatus_t yDrvGpioDeInitStatic(yDrvGpioHandle_t *handle);
+
+    /**
+     * @brief 初始化GPIO配置结构体为默认值
+     * @param config 配置结构体指针
+     * @retval 无
+     */
+    void yDrvGpioConfigStructInit(yDrvGpioConfig_t *config);
+
+    /**
+     * @brief 初始化GPIO句柄结构体为默认值
+     * @param handle 句柄结构体指针
+     * @retval 无
+     */
+    void yDrvGpioHandleStructInit(yDrvGpioHandle_t *handle);
+
+    /**
+     * @brief 初始化GPIO中断配置结构体为默认值
+     * @param extiConfig 中断配置结构体指针
+     * @retval 无
+     */
+    void yDrvGpioExtiConfigStructInit(yDrvGpioExtiConfig_t *extiConfig);
 
     // ==================== GPIO高频操作函数（内联优化） ====================
 
@@ -159,11 +212,11 @@ extern "C"
 
         if (state == YDRV_PIN_SET)
         {
-            LL_GPIO_SetOutputPin(handle->port, handle->pin);
+            LL_GPIO_SetOutputPin(handle->gpioInfo.port, handle->gpioInfo.pinMask);
         }
         else
         {
-            LL_GPIO_ResetOutputPin(handle->port, handle->pin);
+            LL_GPIO_ResetOutputPin(handle->gpioInfo.port, handle->gpioInfo.pinMask);
         }
 
         return YDRV_OK;
@@ -181,7 +234,7 @@ extern "C"
             return YDRV_PIN_RESET;
         }
 
-        return (yDrvPinState_t)LL_GPIO_IsInputPinSet(handle->port, handle->pin);
+        return (yDrvPinState_t)LL_GPIO_IsInputPinSet(handle->gpioInfo.port, handle->gpioInfo.pinMask);
     }
 
     /**
@@ -196,7 +249,7 @@ extern "C"
             return YDRV_INVALID_PARAM;
         }
 
-        LL_GPIO_TogglePin(handle->port, handle->pin);
+        LL_GPIO_TogglePin(handle->gpioInfo.port, handle->gpioInfo.pinMask);
         return YDRV_OK;
     }
 
@@ -268,14 +321,14 @@ extern "C"
      * @retval yDrv状态
      */
     yDrvStatus_t yDrvGpioRegisterCallback(yDrvGpioHandle_t *handle,
-                                          yDrvGpioExit_t *exit);
+                                          yDrvGpioExtiConfig_t *exti);
 
     /**
      * @brief 注销GPIO中断回调函数
      * @param pin GPIO引脚编号
      * @retval yDrv状态
      */
-    yDrvStatus_t yDrvGpioUnregisterCallback(yDrvGpioHandle_t *handle, yDrvExtiTrigger_t trigger);
+    yDrvStatus_t yDrvGpioUnregisterCallback(yDrvGpioHandle_t *handle, yDrvGpioExti_t trigger);
 
     /**
      * @brief 清除GPIO外部中断标志

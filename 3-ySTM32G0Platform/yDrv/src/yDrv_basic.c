@@ -2,8 +2,6 @@
 #include "stm32g0xx_ll_bus.h"
 #include "yDrv_basic.h"
 
-
-
 // ==================== GPIO端口映射表 ====================
 static GPIO_TypeDef *const gpioPortMap[] = {
     GPIOA, // Port A
@@ -69,26 +67,26 @@ static void prv_EnableGpioClock(GPIO_TypeDef *port)
 
 yDrvStatus_t yDrvParseGpio(yDrvGpioPin_t index, yDrvGpioInfo_t *pGpioInfo)
 {
-    if (pGpioInfo == NULL || index >= YDRV_PINMAX)
+    if (pGpioInfo == NULL || index >= YDRV_PINMAX || index <= YDRV_PINNULL)
     {
         return YDRV_INVALID_PARAM;
     }
 
     // 计算端口索引和引脚编号
-    uint8_t portIndex = index / 16; // 每个端口16个引脚
-    uint8_t pinNumber = index % 16; // 引脚编号0-15
+    uint8_t portIndex = ((uint32_t)index - 1) / 16; // 每个端口16个引脚
+    uint8_t pinNumber = ((uint32_t)index - 1) % 16; // 引脚编号0-15
 
     // 检查端口是否存在
-    if (portIndex >= sizeof(gpioPortMap) / sizeof(gpioPortMap[0]) ||
-        gpioPortMap[portIndex] == NULL)
+    if ((portIndex >= (sizeof(gpioPortMap) / sizeof(gpioPortMap[0]))) ||
+        (gpioPortMap[portIndex] == NULL))
     {
         return YDRV_INVALID_PARAM;
     }
 
     // 填充GPIO信息
     pGpioInfo->port = gpioPortMap[portIndex];
-    pGpioInfo->pin = (1U << pinNumber);
-    pGpioInfo->pinNumber = pinNumber;
+    pGpioInfo->pinIndex = pinNumber;
+    pGpioInfo->pinMask = (1UL << pinNumber);
 
     // 使能GPIO端口时钟
     prv_EnableGpioClock(pGpioInfo->port);
@@ -98,7 +96,7 @@ yDrvStatus_t yDrvParseGpio(yDrvGpioPin_t index, yDrvGpioInfo_t *pGpioInfo)
 
 int32_t yDrvIsGpioValid(yDrvGpioPin_t index)
 {
-    if (index >= YDRV_PINMAX)
+    if (index <= YDRV_PINNULL || index >= YDRV_PINMAX)
     {
         return -1; // 参数错误
     }

@@ -21,6 +21,7 @@
 #include "yDev.h"
 #include "yLib_def.h"
 #include "yDrv_basic.h"
+#include "yDev_def.h"
 
 // ==================== 设备操作表边界标记 ====================
 
@@ -56,6 +57,8 @@ const yDevOps_t ydev_start_ops YLIB_SECTION(".ydev_ops_start") =
         .ioctl = NULL,
 };
 
+// ==================== 局部变量实现 ====================
+static size_t ydev_time_ms;
 // ==================== 核心API实现 ====================
 
 /**
@@ -65,7 +68,8 @@ const yDevOps_t ydev_start_ops YLIB_SECTION(".ydev_ops_start") =
  * @par 功能描述:
  * 初始化yLab系统，包括底层驱动初始化
  */
-yDevStatus_t yLabInit(void)
+yDevStatus_t
+yLabInit(void)
 {
     // 初始化底层驱动
     yDrvInit();
@@ -104,6 +108,7 @@ yDevStatus_t yDevInitStatic(void *config, void *handle)
         if (dev_ops->type == dev_config->type)
         {
             dev_handle->index = idx;
+            dev_handle->timeOutMs = 10;
             if (dev_ops->init != NULL)
             {
                 return dev_ops->init(config, handle);
@@ -249,4 +254,42 @@ yDevStatus_t yDevIoctl(void *handle, uint32_t cmd, void *arg)
     {
         return YDEV_NOT_SUPPORTED; // 不支持控制操作
     }
+}
+
+/**
+ * @brief 设备控制操作
+ * @param handle 设备句柄
+ * @param cmd 控制命令
+ * @param arg 命令参数
+ * @return yDevStatus_t 操作状态
+ *
+ * @par 功能描述:
+ * 执行设备特定的控制操作，如配置参数、状态查询等
+ */
+size_t yDevGetTimeMS(void)
+{
+    return ydev_time_ms;
+}
+
+// ==================== yDev结构体基础初始化函数实现 ====================
+
+void yDevConfigStructInit(yDevConfig_t *config)
+{
+    if (config == NULL)
+    {
+        return;
+    }
+
+    config->type = YDEV_TYPE_MAX;
+}
+
+void yDevHandleStructInit(yDevHandle_t *handle)
+{
+    if (handle == NULL)
+    {
+        return;
+    }
+
+    handle->index = 0;
+    handle->timeOutMs = 0;
 }

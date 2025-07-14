@@ -14,13 +14,16 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "switch.h"
+#include "communication.h"
 
 // ==================== 私有宏定义 ====================
 #define LED_TASK_PRIO 6  /**< LED任务优先级 */
-#define LED_STK_SIZE 100 /**< LED任务堆栈大小 */
+#define LED_STK_SIZE 512 /**< LED任务堆栈大小 */
 
 // ==================== 私有变量 ====================
 TaskHandle_t LedTask_Handler; /**< LED任务句柄 */
+
+static uint8_t data_log[100];
 
 // ==================== 公共函数实现 ====================
 
@@ -40,14 +43,22 @@ void BlinkTaskProcess(void *pvParameters)
 {
     // 抑制未使用参数警告
     (void)pvParameters;
+    int32_t len;
     uint32_t button_press_count;
 
     // 初始化开关模块
     SwitchInit();
+    CommunicationInit();
 
     // 任务主循环
     for (;;)
     {
+        len = MessageRead(&data_log, 10);
+        if (len > 0)
+        {
+            MessageWrite(&data_log, len);
+        }
+
         // 检查按键状态
         if (SwitchRead(SWITCH_TYPE_BUTTON) != 0)
         {

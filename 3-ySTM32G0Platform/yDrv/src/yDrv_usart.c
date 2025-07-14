@@ -1,4 +1,4 @@
-/**
+/*
  * @file yDrv_usart.c
  * @brief STM32G0 USART驱动程序实现
  * @version 2.0
@@ -15,16 +15,11 @@
  * @brief 中断回调函数存储结构
  * @note 用于存储每个USART实例的中断回调函数
  */
-typedef struct
+struct
 {
-    yDrvInterruptCallback_t callbacks[8]; // 对应 yDrvUsartInterrupt_t 中的8种中断类型
-} yDrvUsartInterrupts_t;
-
-/**
- * @brief 全局中断处理句柄数组
- * @note 存储每个USART实例的中断回调函数，按USART ID索引
- */
-static yDrvUsartInterrupts_t usart_interrupt_handlers[YDRV_USART_MAX];
+    yDrvInterruptCallback_t callback[YDRV_USART_EXTI_MAX]; // 对应
+    uint8_t flags[YDRV_USART_EXTI_MAX];
+} exit_callback[YDRV_USART_MAX];
 
 // ==================== 私有函数声明 ====================
 
@@ -41,294 +36,239 @@ static void prv_EnableClock(yDrvUsartId_t usartId);
 static void prv_DisableClock(yDrvUsartId_t usartId);
 
 /**
- * @brief 配置USART相关的GPIO引脚
- * @param pConfig USART配置结构指针
+ * @brief 获取实例
+ * @param usartId USART实例ID
  */
-static void prv_ConfigGpio(const yDrvUsartConfig_t *pConfig);
+static void yDrvUsartGetInstance(yDrvUsartId_t usartId,
+                                 yDrvUsartHandle_t *handle);
+
+/**
+ * @brief 配置USART相关的GPIO引脚
+ * @param config USART配置结构指针
+ * @param handle USART句柄指针
+ * @return yDrvStatus_t 状态码
+ */
+static yDrvStatus_t prv_ConfigGpio(const yDrvUsartConfig_t *config, yDrvUsartHandle_t *handle);
 
 /**
  * @brief 反初始化USART相关的GPIO引脚
- * @param husart USART句柄指针
+ * @param handle USART句柄指针
  */
-static void prv_DeInitGpio(const yDrvUsartHandle_t *husart);
-
-/**
- * @brief 获取指定USART实例的APB时钟频率
- * @param instance USART外设实例指针
- * @return uint32_t APB时钟频率（Hz）
- */
-static uint32_t prv_GetPclkFreq(USART_TypeDef *instance);
-
-/**
- * @brief 获取指定USART的中断号
- * @param usartId USART实例ID
- * @return IRQn_Type 中断号，失败返回-1
- */
-static IRQn_Type prv_GetUsartIrqn(yDrvUsartId_t usartId);
+static void prv_DeInitGpio(yDrvUsartHandle_t *handle);
 
 // ==================== 基础函数实现 ====================
 
-yDrvStatus_t yDrvUsartInit(yDrvUsartHandle_t *husart, const yDrvUsartConfig_t *pConfig)
+yDrvStatus_t yDrvUsartInitStatic(const yDrvUsartConfig_t *config, yDrvUsartHandle_t *handle)
 {
-    // 参数有效性检查
-    if (husart == NULL || pConfig == NULL || yDrvUsartIsIdValid(pConfig->usartId) != YDRV_OK)
-    {
-        return YDRV_INVALID_PARAM;
-    }
-
-    // 1. 获取USART外设实例指针
-    USART_TypeDef *instance = yDrvUsartGetInstance(pConfig->usartId);
-    if (instance == NULL)
-    {
-        return YDRV_INVALID_PARAM;
-    }
-
-    // 2. 使能USART外设时钟
-    prv_EnableClock(pConfig->usartId);
-
-    // 3. 配置相关GPIO引脚（TX、RX、RTS、CTS）
-    prv_ConfigGpio(pConfig);
-
-    // 4. 配置USART基本参数
     LL_USART_InitTypeDef usart_init;
-    LL_USART_StructInit(&usart_init); // 初始化为默认值
 
-    // 设置波特率
-    usart_init.BaudRate = pConfig->baudRate;
-
-    // 设置数据位长度
-    usart_init.DataWidth = (pConfig->dataBits == YDRV_USART_DATA_9BIT) ? LL_USART_DATAWIDTH_9B : LL_USART_DATAWIDTH_8B;
-
-    // 设置停止位
-    usart_init.StopBits = (pConfig->stopBits == YDRV_USART_STOP_2BIT) ? LL_USART_STOPBITS_2 : LL_USART_STOPBITS_1;
-
-    // 设置校验位
-    switch (pConfig->parity)
+    // 参数有效性检查
+    if (handle == NULL || config == NULL)
     {
-    case YDRV_USART_PARITY_EVEN:
-        usart_init.Parity = LL_USART_PARITY_EVEN;
-        break;
-    case YDRV_USART_PARITY_ODD:
-        usart_init.Parity = LL_USART_PARITY_ODD;
-        break;
-    default:
-        usart_init.Parity = LL_USART_PARITY_NONE;
-        break;
+        return YDRV_INVALID_PARAM;
     }
 
-    // 设置传输方向
-    switch (pConfig->direction)
+    yDrvUsartHandleStructInit(handle);
+
+    // 1. 获取USART实例并使能时钟
+    yDrvUsartGetInstance(config->usartId, handle);
+    if (handle->instance == NULL)
     {
-    case YDRV_USART_DIR_TX:
-        usart_init.TransferDirection = LL_USART_DIRECTION_TX;
-        break;
-    case YDRV_USART_DIR_RX:
-        usart_init.TransferDirection = LL_USART_DIRECTION_RX;
-        break;
-    default:
-        usart_init.TransferDirection = LL_USART_DIRECTION_TX_RX;
-        break;
+        return YDRV_INVALID_PARAM;
     }
 
-    // 设置硬件流控制
-    switch (pConfig->flowControl)
+    prv_EnableClock(handle->usartId);
+
+    // 2. 配置相关GPIO引脚（TX、RX、RTS、CTS）
+    if (prv_ConfigGpio(config, handle) != YDRV_OK)
     {
-    case YDRV_USART_FLOW_RTS:
-        usart_init.HardwareFlowControl = LL_USART_HWCONTROL_RTS;
-        break;
-    case YDRV_USART_FLOW_CTS:
-        usart_init.HardwareFlowControl = LL_USART_HWCONTROL_CTS;
-        break;
-    case YDRV_USART_FLOW_RTS_CTS:
-        usart_init.HardwareFlowControl = LL_USART_HWCONTROL_RTS_CTS;
-        break;
-    default:
-        usart_init.HardwareFlowControl = LL_USART_HWCONTROL_NONE;
-        break;
+        prv_DisableClock(config->usartId);
+        return YDRV_INVALID_PARAM;
     }
+
+    // 3. 配置USART基本参数
+    LL_USART_StructInit(&usart_init);                     // 初始化为默认值
+    usart_init.PrescalerValue = LL_USART_PRESCALER_DIV1;  // 分频
+    usart_init.BaudRate = config->baudRate;               // 设置波特率
+    usart_init.DataWidth = config->dataBits;              // 设置数据位长度
+    usart_init.StopBits = config->stopBits;               // 设置停止位
+    usart_init.Parity = config->parity;                   // 设置校验位
+    usart_init.TransferDirection = config->direction;     // 设置传输方向
+    usart_init.HardwareFlowControl = config->flowControl; // 设置硬件流控制
+    usart_init.OverSampling = LL_USART_OVERSAMPLING_16;   // 过采样
 
     // 应用USART配置
-    if (LL_USART_Init(instance, &usart_init) != SUCCESS)
+    if (LL_USART_Init(handle->instance, &usart_init) != SUCCESS)
     {
         return YDRV_ERROR;
     }
 
     // 5. 配置特定工作模式
-    switch (pConfig->mode)
+    switch (config->mode)
     {
+    case YDRV_USART_MODE_ASYNCHRONOUS:
+        LL_USART_ConfigAsyncMode(handle->instance);
+        break;
     case YDRV_USART_MODE_SYNCHRONOUS:
         // 同步模式：使能时钟输出，配置时钟相位和极性
-        LL_USART_ConfigClock(instance, LL_USART_CLOCK_ENABLE | LL_USART_CLOCKPHASE_2EDGE | LL_USART_CLOCKPOLARITY_LOW);
+        LL_USART_ConfigClock(handle->instance,
+                             LL_USART_PRESCALER_DIV1, // 预分频器
+                             LL_USART_PHASE_2EDGE,    // 时钟相位
+                             LL_USART_POLARITY_LOW);  // 时钟极性
         break;
     case YDRV_USART_MODE_SMARTCARD:
         // 智能卡模式
-        LL_USART_EnableSmartcard(instance);
+        LL_USART_EnableSmartcard(handle->instance);
         break;
     case YDRV_USART_MODE_SINGLE_WIRE:
         // 单线半双工模式
-        LL_USART_EnableHalfDuplex(instance);
+        LL_USART_EnableHalfDuplex(handle->instance);
         break;
     case YDRV_USART_MODE_IRDA:
         // IrDA红外模式（正常功率）
-        LL_USART_EnableIrda(instance, LL_USART_IRDA_POWER_NORMAL);
+        LL_USART_EnableIrda(handle->instance);
+        LL_USART_SetIrdaPowerMode(handle->instance, LL_USART_IRDA_POWER_NORMAL);
         break;
     case YDRV_USART_MODE_LIN:
         // LIN总线模式
-        LL_USART_EnableLIN(instance);
+        LL_USART_EnableLIN(handle->instance);
         break;
-    default: // YDRV_USART_MODE_UART
+    default: // YDRV_USART_MODE_ASYNCHRONOUS
         // 标准异步UART模式
-        LL_USART_ConfigAsyncMode(instance);
+        LL_USART_ConfigAsyncMode(handle->instance);
         break;
     }
 
     // 6. 使能USART外设
-    LL_USART_Enable(instance);
+    LL_USART_Enable(handle->instance);
 
     // 7. 初始化句柄结构
-    husart->instance = instance;
-    husart->usartId = pConfig->usartId;
-    husart->txPin = pConfig->txPin;
-    husart->rxPin = pConfig->rxPin;
-    husart->rtsPin = pConfig->rtsPin;
-    husart->ctsPin = pConfig->ctsPin;
 
-    // 8. 保存句柄指针到全局数组，供中断处理使用
-    usart_handles[pConfig->usartId] = husart;
+    handle->flagBtyeSend = ((config->parity == YDRV_USART_PARITY_NONE) &&
+                            (config->dataBits == YDRV_USART_DATA_9BIT))
+                               ? 1
+                               : 0;
 
     return YDRV_OK;
 }
 
-yDrvStatus_t yDrvUsartDeInit(yDrvUsartHandle_t *husart)
+yDrvStatus_t yDrvUsartDeInitStatic(yDrvUsartHandle_t *handle)
 {
     // 参数有效性检查
-    if (husart == NULL || husart->instance == NULL)
+    if (handle == NULL || handle->instance == NULL)
     {
         return YDRV_INVALID_PARAM;
     }
 
     // 1. 禁用USART外设
-    LL_USART_Disable(husart->instance);
+    LL_USART_Disable(handle->instance);
 
     // 2. 反初始化相关GPIO引脚，恢复为默认状态
-    prv_DeInitGpio(husart);
+    prv_DeInitGpio(handle);
 
     // 3. 禁用USART外设时钟以节省功耗
-    prv_DisableClock(husart->usartId);
-
-    // 4. 清理全局句柄指针并重置句柄结构
-    usart_handles[husart->usartId] = NULL;
-    memset(husart, 0, sizeof(yDrvUsartHandle_t));
+    prv_DisableClock(handle->usartId);
 
     return YDRV_OK;
 }
 
-// ==================== 数据传输函数实现 ====================
-
-yDrvStatus_t yDrvUsartWrite(yDrvUsartHandle_t *husart, const uint8_t *pData, uint16_t size, uint16_t *pSentSize)
+void yDrvUsartConfigStructInit(yDrvUsartConfig_t *config)
 {
-    // 参数有效性检查
-    if (husart == NULL || husart->instance == NULL || pData == NULL || size == 0)
+    if (config == NULL)
     {
-        return YDRV_INVALID_PARAM;
+        return;
     }
 
-    uint16_t sent = 0;
-
-    // 循环发送所有数据，直到发送完成或发送缓冲区满
-    while (sent < size)
-    {
-        if (yDrvUsartWriteByte(husart, pData[sent]) == YDRV_OK)
-        {
-            sent++; // 成功发送一个字节
-        }
-        else
-        {
-            break; // 发送缓冲区已满，停止发送
-        }
-    }
-
-    // 返回实际发送的字节数
-    if (pSentSize != NULL)
-    {
-        *pSentSize = sent;
-    }
-
-    return (sent > 0) ? YDRV_OK : YDRV_BUSY;
+    config->usartId = YDRV_USART_MAX;
+    config->txPin = YDRV_PINNULL;
+    config->rxPin = YDRV_PINNULL;
+    config->rtsPin = YDRV_PINNULL;
+    config->ctsPin = YDRV_PINNULL;
+    config->baudRate = 115200;
+    config->dataBits = YDRV_USART_DATA_8BIT;
+    config->stopBits = YDRV_USART_STOP_1BIT;
+    config->parity = YDRV_USART_PARITY_NONE;
+    config->direction = YDRV_USART_DIR_TX_RX;
+    config->flowControl = YDRV_USART_FLOW_NONE;
+    config->mode = YDRV_USART_MODE_ASYNCHRONOUS;
+    config->txAF = 0;
+    config->rxAF = 0;
+    config->ctsAF = 0;
+    config->rtsAF = 0;
 }
 
-yDrvStatus_t yDrvUsartRead(yDrvUsartHandle_t *husart, uint8_t *pData, uint16_t size, uint16_t *pReceivedSize)
+void yDrvUsartHandleStructInit(yDrvUsartHandle_t *handle)
 {
-    // 参数有效性检查
-    if (husart == NULL || husart->instance == NULL || pData == NULL || size == 0)
+    if (handle == NULL)
     {
-        return YDRV_INVALID_PARAM;
+        return;
     }
 
-    uint16_t received = 0;
+    handle->instance = NULL;
+    handle->IRQ = (IRQn_Type)0;
+    handle->usartId = YDRV_USART_MAX;
 
-    // 循环接收数据，直到接收完成或接收缓冲区空
-    while (received < size)
-    {
-        if (yDrvUsartReadByte(husart, &pData[received]) == YDRV_OK)
-        {
-            received++; // 成功接收一个字节
-        }
-        else
-        {
-            break; // 接收缓冲区已空，停止接收
-        }
-    }
+    handle->txPinInfo = (yDrvGpioInfo_t){NULL, 0, 0, 0};
+    handle->rxPinInfo = (yDrvGpioInfo_t){NULL, 0, 0, 0};
+    handle->rtsPinInfo = (yDrvGpioInfo_t){NULL, 0, 0, 0};
+    handle->ctsPinInfo = (yDrvGpioInfo_t){NULL, 0, 0, 0};
 
-    // 返回实际接收的字节数
-    if (pReceivedSize != NULL)
-    {
-        *pReceivedSize = received;
-    }
-
-    return (received > 0) ? YDRV_OK : YDRV_BUSY;
+    handle->flagBtyeSend = 0;
 }
 
-// ==================== 控制函数实现 ====================
-
-yDrvStatus_t yDrvUsartSetBaudRate(yDrvUsartHandle_t *husart, uint32_t baudRate)
+void yDrvUsartExtiConfigStructInit(yDrvUsartExtiConfig_t *extiConfig)
 {
-    // 参数有效性检查
-    if (husart == NULL || husart->instance == NULL || baudRate == 0)
+    if (extiConfig == NULL)
     {
-        return YDRV_INVALID_PARAM;
+        return;
     }
 
-    // 获取USART对应的APB时钟频率
-    uint32_t pclk = prv_GetPclkFreq(husart->instance);
-
-    // 使用16倍过采样率设置波特率
-    LL_USART_SetBaudRate(husart->instance, pclk, LL_USART_OVERSAMPLING_16, baudRate);
-
-    return YDRV_OK;
+    extiConfig->trigger = YDRV_USART_EXTI_MAX;
+    extiConfig->prio = 0;
+    extiConfig->function = NULL;
+    extiConfig->arg = NULL;
+    extiConfig->enable = 0;
 }
 
 // ==================== 工具函数实现 ====================
 
-USART_TypeDef *yDrvUsartGetInstance(yDrvUsartId_t usartId)
+static void yDrvUsartGetInstance(yDrvUsartId_t usartId,
+                                 yDrvUsartHandle_t *handle)
 {
     // 根据USART ID返回对应的外设实例指针
-    switch (usartId)
+    handle->usartId = usartId;
+    switch (handle->usartId)
     {
     case YDRV_USART_1:
-        return USART1;
+        handle->instance = USART1;
+        handle->IRQ = USART1_IRQn;
+        break;
     case YDRV_USART_2:
-        return USART2;
+        handle->instance = USART2;
+        handle->IRQ = USART2_IRQn;
+        break;
     case YDRV_USART_3:
-        return USART3;
+        handle->instance = USART3;
+        handle->IRQ = USART3_4_IRQn;
+        break;
     case YDRV_USART_4:
-        return UART4; // 注意：UART4不是USART4
-    case YDRV_USART_5:
-        return UART5; // 注意：UART5不是USART5
+        handle->instance = USART4;
+        handle->IRQ = USART3_4_IRQn;
+        break;
+#ifdef USART5
+        handle->instance = USART5;
+        handle->IRQ = USART5_6_IRQn;
+        break;
+#endif
+#ifdef USART5
     case YDRV_USART_6:
-        return USART6;
+        handle->instance = USART6;
+        handle->IRQ = USART5_6_IRQn;
+        break;
+#endif
     default:
-        return NULL; // 无效的USART ID
+        handle->instance = NULL;
+        break;
     }
 }
 
@@ -336,243 +276,195 @@ USART_TypeDef *yDrvUsartGetInstance(yDrvUsartId_t usartId)
 
 /**
  * @brief 设置智能卡模式的保护时间
- * @param husart USART句柄指针
+ * @param handle USART句柄指针
  * @param guardTime 保护时间值（0-255）
  * @note 仅在智能卡模式下有效
  */
-void yDrvUsartSetSmartcardGuardTime(yDrvUsartHandle_t *husart, uint8_t guardTime)
+void yDrvUsartSetSmartcardGuardTime(yDrvUsartHandle_t *handle, uint8_t guardTime)
 {
-    if (husart && husart->instance)
+    (void)guardTime;
+    if (handle && handle->instance)
     {
-        LL_USART_SetGuardTime(husart->instance, guardTime);
+        // LL_USART_SetGuardTime(handle->instance, guardTime);
     }
 }
 
 /**
  * @brief 设置IrDA模式的功耗模式
- * @param husart USART句柄指针
+ * @param handle USART句柄指针
  * @param powerMode true=低功耗模式，false=正常功率模式
  * @note 仅在IrDA模式下有效
  */
-void yDrvUsartSetIrdaPowerMode(yDrvUsartHandle_t *husart, bool powerMode)
+void yDrvUsartSetIrdaPowerMode(yDrvUsartHandle_t *handle, bool powerMode)
 {
-    if (husart && husart->instance)
+    if (handle && handle->instance)
     {
         uint32_t mode = powerMode ? LL_USART_IRDA_POWER_LOW : LL_USART_IRDA_POWER_NORMAL;
-        LL_USART_SetIrdaPowerMode(husart->instance, mode);
+        LL_USART_SetIrdaPowerMode(handle->instance, mode);
     }
 }
 
 /**
  * @brief 设置LIN模式的中断检测长度
- * @param husart USART句柄指针
+ * @param handle USART句柄指针
  * @param breakLength true=11位中断检测，false=10位中断检测
  * @note 仅在LIN模式下有效
  */
-void yDrvUsartSetLinBreakLength(yDrvUsartHandle_t *husart, bool breakLength)
+void yDrvUsartSetLinBreakLength(yDrvUsartHandle_t *handle, bool breakLength)
 {
-    if (husart && husart->instance)
+    if (handle && handle->instance)
     {
         uint32_t length = breakLength ? LL_USART_LINBREAK_DETECT_11B : LL_USART_LINBREAK_DETECT_10B;
-        LL_USART_SetLINBrkDetectionLen(husart->instance, length);
+        LL_USART_SetLINBrkDetectionLen(handle->instance, length);
     }
 }
 
 /**
  * @brief 发送LIN中断信号
- * @param husart USART句柄指针
+ * @param handle USART句柄指针
  * @note 仅在LIN模式下有效
  */
-void yDrvUsartSendLinBreak(yDrvUsartHandle_t *husart)
+void yDrvUsartSendLinBreak(yDrvUsartHandle_t *handle)
 {
-    if (husart && husart->instance)
+    if (handle && handle->instance)
     {
-        LL_USART_RequestBreakSending(husart->instance);
+        LL_USART_RequestBreakSending(handle->instance);
     }
 }
 
 // ==================== 中断管理函数实现 ====================
 
-yDrvStatus_t yDrvUsartEnableInterrupt(yDrvUsartHandle_t *husart, uint32_t prio)
+yDrvStatus_t yDrvUsartRegisterCallback(yDrvUsartHandle_t *handle,
+                                       yDrvUsartExtiConfig_t exit)
 {
     // 参数有效性检查
-    if (husart == NULL)
+    if (handle == NULL || handle->instance == NULL)
     {
         return YDRV_INVALID_PARAM;
     }
 
-    // 获取对应的中断号
-    IRQn_Type irqn = prv_GetUsartIrqn(husart->usartId);
-    if (irqn < 0)
-    {
-        return YDRV_NOT_SUPPORTED; // 不支持的USART实例
-    }
-
-    // 设置中断优先级并使能中断
-    NVIC_SetPriority(irqn, prio);
-    NVIC_EnableIRQ(irqn);
-
-    return YDRV_OK;
-}
-
-yDrvStatus_t yDrvUsartDisableInterrupt(yDrvUsartHandle_t *husart)
-{
-    // 参数有效性检查
-    if (husart == NULL)
+    // 检查USART ID是否有效
+    if (handle->usartId >= YDRV_USART_MAX)
     {
         return YDRV_INVALID_PARAM;
     }
 
-    // 获取对应的中断号
-    IRQn_Type irqn = prv_GetUsartIrqn(husart->usartId);
-    if (irqn < 0)
-    {
-        return YDRV_NOT_SUPPORTED; // 不支持的USART实例
-    }
-
-    // 禁用中断
-    NVIC_DisableIRQ(irqn);
-    return YDRV_OK;
-}
-
-yDrvStatus_t yDrvUsartRegisterCallback(yDrvUsartHandle_t *husart, uint32_t interruptType, yDrvInterruptCallback_t callback)
-{
-    // 参数有效性检查
-    if (husart == NULL || callback == NULL)
+    // 检查中断类型是否有效
+    if (exit.trigger >= YDRV_USART_EXTI_MAX)
     {
         return YDRV_INVALID_PARAM;
     }
 
-    // 遍历所有可能的中断类型位
-    for (uint32_t i = 0; i < 8; i++)
+    // 存储回调函数和参数
+    exit_callback[handle->usartId].callback[exit.trigger].function = exit.function;
+    exit_callback[handle->usartId].callback[exit.trigger].arg = exit.arg;
+    exit_callback[handle->usartId].flags[exit.trigger] = exit.enable;
+
+    // 根据中断类型使能对应的硬件中断
+    switch (exit.trigger)
     {
-        uint32_t current_it = 1 << i; // 计算当前位对应的中断类型
+    case YDRV_USART_EXTI_TXE:
+        LL_USART_EnableIT_TXE(handle->instance);
+        break;
 
-        // 如果当前中断类型被设置
-        if (interruptType & current_it)
-        {
-            // 注册回调函数
-            usart_interrupt_handlers[husart->usartId].callbacks[i] = callback;
+    case YDRV_USART_EXTI_RXNE:
+        LL_USART_EnableIT_RXNE(handle->instance);
+        break;
 
-            // 在外设中使能对应的中断
-            switch ((yDrvUsartInterrupt_t)current_it)
-            {
-            case YDRV_USART_IT_TXE: // 发送数据寄存器空中断
-                LL_USART_EnableIT_TXE(husart->instance);
-                break;
-            case YDRV_USART_IT_RXNE: // 接收数据寄存器非空中断
-                LL_USART_EnableIT_RXNE(husart->instance);
-                break;
-            case YDRV_USART_IT_TC: // 发送完成中断
-                LL_USART_EnableIT_TC(husart->instance);
-                break;
-            case YDRV_USART_IT_IDLE: // 空闲线路检测中断
-                LL_USART_EnableIT_IDLE(husart->instance);
-                break;
-            case YDRV_USART_IT_PE: // 奇偶校验错误中断
-                LL_USART_EnableIT_PE(husart->instance);
-                break;
-            case YDRV_USART_IT_ERR: // 错误中断（帧错误、噪声错误、过载错误）
-                LL_USART_EnableIT_ERROR(husart->instance);
-                break;
-            case YDRV_USART_IT_LBD: // LIN中断检测中断
-                LL_USART_EnableIT_LBD(husart->instance);
-                break;
-            case YDRV_USART_IT_CTS: // CTS中断
-                LL_USART_EnableIT_CTS(husart->instance);
-                break;
-            default:
-                break;
-            }
-        }
-    }
-    return YDRV_OK;
-}
+    case YDRV_USART_EXTI_TC:
+        LL_USART_EnableIT_TC(handle->instance);
+        break;
 
-yDrvStatus_t yDrvUsartUnregisterCallback(yDrvUsartHandle_t *husart, uint32_t interruptType)
-{
-    // 参数有效性检查
-    if (husart == NULL)
-    {
+    case YDRV_USART_EXTI_IDLE:
+        LL_USART_EnableIT_IDLE(handle->instance);
+        break;
+
+    case YDRV_USART_EXTI_PE:
+        LL_USART_EnableIT_PE(handle->instance);
+        break;
+
+    case YDRV_USART_EXTI_ERR:
+        LL_USART_EnableIT_ERROR(handle->instance);
+        break;
+
+    case YDRV_USART_EXTI_LBD:
+        LL_USART_EnableIT_LBD(handle->instance);
+        break;
+
+    case YDRV_USART_EXTI_CTS:
+        LL_USART_EnableIT_CTS(handle->instance);
+        break;
+
+    default:
         return YDRV_INVALID_PARAM;
     }
 
-    // 遍历所有可能的中断类型位
-    for (uint32_t i = 0; i < 8; i++)
-    {
-        uint32_t current_it = 1 << i; // 计算当前位对应的中断类型
+    // 设置中断优先级
+    NVIC_SetPriority(handle->IRQ, exit.prio);
 
-        // 如果当前中断类型被设置
-        if (interruptType & current_it)
-        {
-            // 清除回调函数
-            usart_interrupt_handlers[husart->usartId].callbacks[i] = NULL;
-
-            // 在外设中禁用对应的中断
-            switch ((yDrvUsartInterrupt_t)current_it)
-            {
-            case YDRV_USART_IT_TXE: // 发送数据寄存器空中断
-                LL_USART_DisableIT_TXE(husart->instance);
-                break;
-            case YDRV_USART_IT_RXNE: // 接收数据寄存器非空中断
-                LL_USART_DisableIT_RXNE(husart->instance);
-                break;
-            case YDRV_USART_IT_TC: // 发送完成中断
-                LL_USART_DisableIT_TC(husart->instance);
-                break;
-            case YDRV_USART_IT_IDLE: // 空闲线路检测中断
-                LL_USART_DisableIT_IDLE(husart->instance);
-                break;
-            case YDRV_USART_IT_PE: // 奇偶校验错误中断
-                LL_USART_DisableIT_PE(husart->instance);
-                break;
-            case YDRV_USART_IT_ERR: // 错误中断
-                LL_USART_DisableIT_ERROR(husart->instance);
-                break;
-            case YDRV_USART_IT_LBD: // LIN中断检测中断
-                LL_USART_DisableIT_LBD(husart->instance);
-                break;
-            case YDRV_USART_IT_CTS: // CTS中断
-                LL_USART_DisableIT_CTS(husart->instance);
-                break;
-            default:
-                break;
-            }
-        }
+    if (exit.enable)
+    { // 使能NVIC中断
+        NVIC_EnableIRQ(handle->IRQ);
     }
+    else
+    {
+        NVIC_DisableIRQ(handle->IRQ);
+    }
+
     return YDRV_OK;
 }
 
-uint8_t yDrvUsartGetEnabledInterrupts(yDrvUsartHandle_t *husart)
+yDrvStatus_t yDrvUsartUnregisterCallback(yDrvUsartHandle_t *handle, yDrvUsartExti_t type)
+
 {
     // 参数有效性检查
-    if (husart == NULL || husart->instance == NULL)
-        return 0;
+    // 禁用对应的硬件中断
+    switch (type)
+    {
+    case YDRV_USART_EXTI_TXE:
+        LL_USART_DisableIT_TXE(handle->instance);
+        break;
 
-    uint8_t enabled_its = 0;
+    case YDRV_USART_EXTI_RXNE:
+        LL_USART_DisableIT_RXNE(handle->instance);
+        break;
 
-    // 检查各种中断是否已使能，构建返回值
-    if (LL_USART_IsEnabledIT_TXE(husart->instance))
-        enabled_its |= YDRV_USART_IT_TXE; // 发送数据寄存器空中断
-    if (LL_USART_IsEnabledIT_RXNE(husart->instance))
-        enabled_its |= YDRV_USART_IT_RXNE; // 接收数据寄存器非空中断
-    if (LL_USART_IsEnabledIT_TC(husart->instance))
-        enabled_its |= YDRV_USART_IT_TC; // 发送完成中断
-    if (LL_USART_IsEnabledIT_IDLE(husart->instance))
-        enabled_its |= YDRV_USART_IT_IDLE; // 空闲线路检测中断
-    if (LL_USART_IsEnabledIT_PE(husart->instance))
-        enabled_its |= YDRV_USART_IT_PE; // 奇偶校验错误中断
-    if (LL_USART_IsEnabledIT_ERROR(husart->instance))
-        enabled_its |= YDRV_USART_IT_ERR; // 错误中断
-    if (LL_USART_IsEnabledIT_LBD(husart->instance))
-        enabled_its |= YDRV_USART_IT_LBD; // LIN中断检测中断
-    if (LL_USART_IsEnabledIT_CTS(husart->instance))
-        enabled_its |= YDRV_USART_IT_CTS; // CTS中断
+    case YDRV_USART_EXTI_TC:
+        LL_USART_DisableIT_TC(handle->instance);
+        break;
 
-    return enabled_its;
+    case YDRV_USART_EXTI_IDLE:
+        LL_USART_DisableIT_IDLE(handle->instance);
+        break;
+
+    case YDRV_USART_EXTI_PE:
+        LL_USART_DisableIT_PE(handle->instance);
+        break;
+
+    case YDRV_USART_EXTI_ERR:
+        LL_USART_DisableIT_ERROR(handle->instance);
+        break;
+
+    case YDRV_USART_EXTI_LBD:
+        LL_USART_DisableIT_LBD(handle->instance);
+        break;
+
+    case YDRV_USART_EXTI_CTS:
+        LL_USART_DisableIT_CTS(handle->instance);
+        break;
+
+    default:
+        return YDRV_INVALID_PARAM;
+    }
+
+    // 清除回调函数
+    exit_callback[handle->usartId].callback[type].function = NULL;
+    exit_callback[handle->usartId].callback[type].arg = NULL;
+
+    return YDRV_OK;
 }
 
-// ==================== 私有函数实现 ====================
+// // ==================== 私有函数实现 ====================
 
 /**
  * @brief 使能指定USART的时钟
@@ -589,14 +481,22 @@ static void prv_EnableClock(yDrvUsartId_t usartId)
     case YDRV_USART_2:
         LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_USART2);
         break;
-#ifdef USART3 // STM32G0部分型号有USART3
     case YDRV_USART_3:
         LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_USART3);
         break;
-#endif
 #ifdef USART4 // STM32G0部分型号有USART4
     case YDRV_USART_4:
         LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_USART4);
+        break;
+#endif
+#ifdef UART5
+    case YDRV_USART_5:
+        LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_UART5);
+        break;
+#endif
+#ifdef USART6
+    case YDRV_USART_6:
+        LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_USART6);
         break;
 #endif
     default:
@@ -623,14 +523,18 @@ static void prv_DisableClock(yDrvUsartId_t usartId)
         LL_APB1_GRP1_DisableClock(LL_APB1_GRP1_PERIPH_USART3);
         break;
     case YDRV_USART_4:
-        LL_APB1_GRP1_DisableClock(LL_APB1_GRP1_PERIPH_UART4);
+        LL_APB1_GRP1_DisableClock(LL_APB1_GRP1_PERIPH_USART4);
         break;
+#ifdef UART5
     case YDRV_USART_5:
         LL_APB1_GRP1_DisableClock(LL_APB1_GRP1_PERIPH_UART5);
         break;
+#endif
+#ifdef USART6
     case YDRV_USART_6:
         LL_APB2_GRP1_DisableClock(LL_APB2_GRP1_PERIPH_USART6);
         break;
+#endif
     default:
         break;
     }
@@ -638,328 +542,292 @@ static void prv_DisableClock(yDrvUsartId_t usartId)
 
 /**
  * @brief 配置USART相关的GPIO引脚
- * @param pConfig USART配置结构指针
+ * @param config USART配置结构指针
  * @note 配置TX、RX引脚为复用功能，根据流控设置配置RTS、CTS引脚
  */
-static void prv_ConfigGpio(const yDrvUsartConfig_t *pConfig)
+static yDrvStatus_t prv_ConfigGpio(const yDrvUsartConfig_t *config, yDrvUsartHandle_t *handle)
 {
-    // 配置TX引脚：复用功能、高速、上拉、推挽输出
-    yDrvGpioInit(pConfig->txPin, YDRV_GPIO_MODE_AF, YDRV_GPIO_SPEED_HIGH, YDRV_GPIO_PUPD_PULLUP, YDRV_GPIO_TYPE_PUSHPULL);
+    yDrvStatus_t status;
+    LL_GPIO_InitTypeDef gpio_init;
 
-    // 配置RX引脚：复用功能、高速、上拉、推挽输出
-    yDrvGpioInit(pConfig->rxPin, YDRV_GPIO_MODE_AF, YDRV_GPIO_SPEED_HIGH, YDRV_GPIO_PUPD_PULLUP, YDRV_GPIO_TYPE_PUSHPULL);
+    // 配置TX引脚：复用功能、推挽输出
+    if ((config->direction == YDRV_USART_DIR_TX) ||
+        (config->direction == YDRV_USART_DIR_TX_RX))
+    {
+        status = yDrvParseGpio(config->txPin, &handle->txPinInfo);
+        if (status != YDRV_OK)
+        {
+            return YDRV_INVALID_PARAM;
+        }
+
+        gpio_init.Pin = handle->txPinInfo.pinMask;
+        gpio_init.Mode = LL_GPIO_MODE_ALTERNATE;
+        gpio_init.Speed = LL_GPIO_SPEED_FREQ_LOW;
+        gpio_init.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+        gpio_init.Pull = LL_GPIO_PULL_NO;
+        gpio_init.Alternate = config->txAF;
+
+        // 配置TX引脚为复用功能模式
+        LL_GPIO_Init(handle->txPinInfo.port, &gpio_init);
+        handle->txPinInfo.flag = 1;
+    }
+
+    // 配置RX引脚：复用功能
+    if ((config->direction == YDRV_USART_DIR_RX) ||
+        (config->direction == YDRV_USART_DIR_TX_RX))
+    {
+        status = yDrvParseGpio(config->rxPin, &handle->txPinInfo);
+        if (status != YDRV_OK)
+        {
+            return YDRV_INVALID_PARAM;
+        }
+
+        gpio_init.Pin = handle->txPinInfo.pinMask;
+        gpio_init.Mode = LL_GPIO_MODE_ALTERNATE;
+        gpio_init.Speed = LL_GPIO_SPEED_FREQ_LOW;
+        gpio_init.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+        gpio_init.Pull = LL_GPIO_PULL_NO;
+        gpio_init.Alternate = config->rxAF;
+
+        // 配置RX引脚为复用功能模式
+        LL_GPIO_Init(handle->txPinInfo.port, &gpio_init);
+        handle->rxPinInfo.flag = 1;
+    }
 
     // 如果使能RTS流控，配置RTS引脚
-    if (pConfig->flowControl == YDRV_USART_FLOW_RTS || pConfig->flowControl == YDRV_USART_FLOW_RTS_CTS)
+    if ((config->flowControl == YDRV_USART_FLOW_RTS) ||
+        (config->flowControl == YDRV_USART_FLOW_RTS_CTS))
     {
-        yDrvGpioInit(pConfig->rtsPin, YDRV_GPIO_MODE_AF, YDRV_GPIO_SPEED_HIGH, YDRV_GPIO_PUPD_NONE, YDRV_GPIO_TYPE_PUSHPULL);
+        status = yDrvParseGpio(config->rtsPin, &handle->rtsPinInfo);
+        if (status != YDRV_OK)
+        {
+            return YDRV_INVALID_PARAM;
+        }
+
+        gpio_init.Pin = handle->rtsPinInfo.pinMask;
+        gpio_init.Mode = LL_GPIO_MODE_ALTERNATE;
+        gpio_init.Speed = LL_GPIO_SPEED_FREQ_LOW;
+        gpio_init.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+        gpio_init.Pull = LL_GPIO_PULL_NO;
+        gpio_init.Alternate = config->rtsAF;
+
+        // 配置RTS引脚为复用功能模式
+        LL_GPIO_Init(handle->rtsPinInfo.port, &gpio_init);
+        handle->rtsPinInfo.flag = 1;
     }
 
     // 如果使能CTS流控，配置CTS引脚
-    if (pConfig->flowControl == YDRV_USART_FLOW_CTS || pConfig->flowControl == YDRV_USART_FLOW_RTS_CTS)
+    if ((config->flowControl == YDRV_USART_FLOW_CTS) ||
+        (config->flowControl == YDRV_USART_FLOW_RTS_CTS))
     {
-        yDrvGpioInit(pConfig->ctsPin, YDRV_GPIO_MODE_AF, YDRV_GPIO_SPEED_HIGH, YDRV_GPIO_PUPD_NONE, YDRV_GPIO_TYPE_PUSHPULL);
+        status = yDrvParseGpio(config->ctsPin, &handle->ctsPinInfo);
+        if (status != YDRV_OK)
+        {
+            return YDRV_INVALID_PARAM;
+        }
+
+        gpio_init.Pin = handle->ctsPinInfo.pinMask;
+        gpio_init.Mode = LL_GPIO_MODE_ALTERNATE;
+        gpio_init.Speed = LL_GPIO_SPEED_FREQ_LOW;
+        gpio_init.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+        gpio_init.Pull = LL_GPIO_PULL_NO;
+        gpio_init.Alternate = config->ctsAF;
+
+        // 配置CTS引脚为复用功能模式
+        LL_GPIO_Init(handle->ctsPinInfo.port, &gpio_init);
+        handle->ctsPinInfo.flag = 1;
     }
+
+    return YDRV_OK;
 }
 
 /**
  * @brief 反初始化USART相关的GPIO引脚
- * @param husart USART句柄指针
+ * @param handle USART句柄指针
  * @note 将所有使用的GPIO引脚恢复为默认状态
  */
-static void prv_DeInitGpio(const yDrvUsartHandle_t *husart)
+static void prv_DeInitGpio(yDrvUsartHandle_t *handle)
 {
-    yDrvGpioDeInit(husart->txPin);  // 反初始化TX引脚
-    yDrvGpioDeInit(husart->rxPin);  // 反初始化RX引脚
-    yDrvGpioDeInit(husart->rtsPin); // 反初始化RTS引脚
-    yDrvGpioDeInit(husart->ctsPin); // 反初始化CTS引脚
-}
+    LL_GPIO_InitTypeDef gpio_init;
 
-/**
- * @brief 获取指定USART实例的APB时钟频率
- * @param instance USART外设实例指针
- * @return uint32_t APB时钟频率（Hz）
- * @note USART1和USART6使用APB2时钟，其他使用APB1时钟
- */
-static uint32_t prv_GetPclkFreq(USART_TypeDef *instance)
-{
-    if (instance == USART1 || instance == USART6)
+    // 参数有效性检查
+    if (handle == NULL)
     {
-        // USART1和USART6在APB2总线上
-        return LL_RCC_GetAPB2CLKFreq(LL_RCC_GetSysClkFreq());
+        return;
     }
-    else
-    {
-        // USART2、USART3、UART4、UART5在APB1总线上
-        return LL_RCC_GetAPB1CLKFreq(LL_RCC_GetSysClkFreq());
-    }
-}
 
-/**
- * @brief 获取指定USART的中断号
- * @param usartId USART实例ID
- * @return IRQn_Type 中断号，失败返回-1
- */
-static IRQn_Type prv_GetUsartIrqn(yDrvUsartId_t usartId)
-{
-    switch (usartId)
+    // 反初始化GPIO引脚为默认状态
+    LL_GPIO_StructInit(&gpio_init);
+    gpio_init.Mode = LL_GPIO_MODE_ANALOG;     // 模拟模式，最低功耗
+    gpio_init.Speed = LL_GPIO_SPEED_FREQ_LOW; // 低速
+    gpio_init.Pull = LL_GPIO_PULL_NO;         // 无上下拉
+    gpio_init.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+
+    if (handle->txPinInfo.flag == 1)
     {
-    case YDRV_USART_1:
-        return USART1_IRQn;
-    case YDRV_USART_2:
-        return USART2_IRQn;
-    case YDRV_USART_3:
-        return USART3_IRQn;
-    case YDRV_USART_4:
-        return UART4_IRQn;
-    case YDRV_USART_5:
-        return UART5_IRQn;
-    case YDRV_USART_6:
-        return USART6_IRQn;
-    default:
-        return (IRQn_Type)-1; // 无效的USART ID
+        gpio_init.Pin = handle->txPinInfo.pinMask;
+        LL_GPIO_Init(handle->txPinInfo.port, &gpio_init);
+        handle->txPinInfo.flag = 0;
+    }
+
+    if (handle->rxPinInfo.flag == 1)
+    {
+        gpio_init.Pin = handle->rxPinInfo.pinMask;
+        LL_GPIO_Init(handle->rxPinInfo.port, &gpio_init);
+        handle->rxPinInfo.flag = 0;
+    }
+
+    if (handle->rtsPinInfo.flag == 1)
+    {
+        gpio_init.Pin = handle->rtsPinInfo.pinMask;
+        LL_GPIO_Init(handle->rtsPinInfo.port, &gpio_init);
+        handle->rtsPinInfo.flag = 0;
+    }
+
+    if (handle->ctsPinInfo.flag == 1)
+    {
+        gpio_init.Pin = handle->ctsPinInfo.pinMask;
+        LL_GPIO_Init(handle->ctsPinInfo.port, &gpio_init);
+        handle->ctsPinInfo.flag = 0;
     }
 }
 
-/**
- * @brief USART中断统一处理函数
- * @param usartId USART实例ID
- * @note 此函数被各个USART的中断处理函数调用，统一处理中断逻辑
- */
-/**
- * @brief 获取指定USART的中断号
- * @param usartId USART实例ID
- * @return IRQn_Type 中断号，失败返回-1
- */
-static IRQn_Type prv_GetUsartIrqn(yDrvUsartId_t usartId)
-{
-    switch (usartId)
-    {
-    case YDRV_USART_1:
-        return USART1_IRQn;
-    case YDRV_USART_2:
-        return USART2_IRQn;
-    case YDRV_USART_3:
-        return USART3_IRQn;
-    case YDRV_USART_4:
-        return UART4_IRQn;
-    case YDRV_USART_5:
-        return UART5_IRQn;
-    case YDRV_USART_6:
-        return USART6_IRQn;
-    default:
-        return (IRQn_Type)-1; // 无效的USART ID
-    }
-}
+// // ==================== 中断处理函数（优化版本） ====================
 
-// ==================== 中断处理函数（优化版本） ====================
+#define USART_HANDLE_EXIT_IRQ(instance, index)                            \
+    do                                                                    \
+    {                                                                     \
+        /* 1. 接收数据寄存器非空中断 (RXNE) - 最高优先级 */               \
+        if (LL_USART_IsActiveFlag_RXNE(instance) &&                       \
+            LL_USART_IsEnabledIT_RXNE(instance) &&                        \
+            exit_callback[index].callback[YDRV_USART_EXTI_RXNE].function) \
+        {                                                                 \
+            exit_callback[index].callback[YDRV_USART_EXTI_RXNE].function( \
+                exit_callback[index].callback[YDRV_USART_EXTI_RXNE].arg); \
+        }                                                                 \
+                                                                          \
+        /* 2. 发送数据寄存器空中断 (TXE) */                               \
+        if (LL_USART_IsActiveFlag_TXE(instance) &&                        \
+            LL_USART_IsEnabledIT_TXE(instance) &&                         \
+            exit_callback[index].callback[YDRV_USART_EXTI_TXE].function)  \
+        {                                                                 \
+            exit_callback[index].callback[YDRV_USART_EXTI_TXE].function(  \
+                exit_callback[index].callback[YDRV_USART_EXTI_TXE].arg);  \
+        }                                                                 \
+                                                                          \
+        /* 3. 传输完成中断 (TC) */                                        \
+        if (LL_USART_IsActiveFlag_TC(instance) &&                         \
+            LL_USART_IsEnabledIT_TC(instance) &&                          \
+            exit_callback[index].callback[YDRV_USART_EXTI_TC].function)   \
+        {                                                                 \
+            exit_callback[index].callback[YDRV_USART_EXTI_TC].function(   \
+                exit_callback[index].callback[YDRV_USART_EXTI_TC].arg);   \
+        }                                                                 \
+                                                                          \
+        /* 4. 空闲线路检测中断 (IDLE) */                                  \
+        if (LL_USART_IsActiveFlag_IDLE(instance) &&                       \
+            LL_USART_IsEnabledIT_IDLE(instance) &&                        \
+            exit_callback[index].callback[YDRV_USART_EXTI_IDLE].function) \
+        {                                                                 \
+            LL_USART_ClearFlag_IDLE(instance);                            \
+            exit_callback[index].callback[YDRV_USART_EXTI_IDLE].function( \
+                exit_callback[index].callback[YDRV_USART_EXTI_IDLE].arg); \
+        }                                                                 \
+                                                                          \
+        /* 5. 奇偶校验错误中断 (PE) */                                    \
+        if (LL_USART_IsActiveFlag_PE(instance) &&                         \
+            LL_USART_IsEnabledIT_PE(instance) &&                          \
+            exit_callback[index].callback[YDRV_USART_EXTI_PE].function)   \
+        {                                                                 \
+            LL_USART_ClearFlag_PE(instance);                              \
+            exit_callback[index].callback[YDRV_USART_EXTI_PE].function(   \
+                exit_callback[index].callback[YDRV_USART_EXTI_PE].arg);   \
+        }                                                                 \
+                                                                          \
+        /* 6. 错误中断 (FE, NE, ORE) */                                   \
+        if ((LL_USART_IsActiveFlag_FE(instance) ||                        \
+             LL_USART_IsActiveFlag_NE(instance) ||                        \
+             LL_USART_IsActiveFlag_ORE(instance)) &&                      \
+            LL_USART_IsEnabledIT_ERROR(instance) &&                       \
+            exit_callback[index].callback[YDRV_USART_EXTI_ERR].function)  \
+        {                                                                 \
+            if (LL_USART_IsActiveFlag_FE(instance))                       \
+                LL_USART_ClearFlag_FE(instance);                          \
+            if (LL_USART_IsActiveFlag_NE(instance))                       \
+                LL_USART_ClearFlag_NE(instance);                          \
+            if (LL_USART_IsActiveFlag_ORE(instance))                      \
+                LL_USART_ClearFlag_ORE(instance);                         \
+            exit_callback[index].callback[YDRV_USART_EXTI_ERR].function(  \
+                exit_callback[index].callback[YDRV_USART_EXTI_ERR].arg);  \
+        }                                                                 \
+                                                                          \
+        /* 7. LIN断开检测中断 (LBD) */                                    \
+        if (LL_USART_IsActiveFlag_LBD(instance) &&                        \
+            LL_USART_IsEnabledIT_LBD(instance) &&                         \
+            exit_callback[index].callback[YDRV_USART_EXTI_LBD].function)  \
+        {                                                                 \
+            LL_USART_ClearFlag_LBD(instance);                             \
+            exit_callback[index].callback[YDRV_USART_EXTI_LBD].function(  \
+                exit_callback[index].callback[YDRV_USART_EXTI_LBD].arg);  \
+        }                                                                 \
+                                                                          \
+        /* 8. CTS状态变化中断 (CTS) */                                    \
+        if (LL_USART_IsActiveFlag_nCTS(instance) &&                       \
+            LL_USART_IsEnabledIT_CTS(instance) &&                         \
+            exit_callback[index].callback[YDRV_USART_EXTI_CTS].function)  \
+        {                                                                 \
+            LL_USART_ClearFlag_nCTS(instance);                            \
+            exit_callback[index].callback[YDRV_USART_EXTI_CTS].function(  \
+                exit_callback[index].callback[YDRV_USART_EXTI_CTS].arg);  \
+        }                                                                 \
+    } while (0)
+
+// ==================== 中断处理函数实现 ====================
 
 /**
- * @brief USART1中断处理函数（优化版本）
- * @note 此函数由NVIC调用，使用内联优化提高性能
+ * @brief USART1中断处理函数
  */
 void USART1_IRQHandler(void)
 {
-    yDrvUsartHandle_t *husart = usart_handles[YDRV_USART_1];
-    if (husart == NULL)
-        return;
-
-    uint32_t sr = USART1->SR;
-    uint32_t cr1 = USART1->CR1;
-    uint32_t cr2 = USART1->CR2;
-    uint32_t cr3 = USART1->CR3;
-    yDrvUsartInterrupts_t *cb = &usart_interrupt_handlers[YDRV_USART_1];
-
-    // 按优先级处理中断
-    if ((sr & USART_SR_RXNE) && (cr1 & USART_CR1_RXNEIE) && cb->callbacks[1])
-        cb->callbacks[1](husart);
-    if ((sr & USART_SR_TXE) && (cr1 & USART_CR1_TXEIE) && cb->callbacks[0])
-        cb->callbacks[0](husart);
-    if ((sr & USART_SR_TC) && (cr1 & USART_CR1_TCIE) && cb->callbacks[2])
-        cb->callbacks[2](husart);
-    if ((sr & USART_SR_IDLE) && (cr1 & USART_CR1_IDLEIE) && cb->callbacks[3])
-        cb->callbacks[3](husart);
-    if ((sr & USART_SR_PE) && (cr1 & USART_CR1_PEIE) && cb->callbacks[4])
-        cb->callbacks[4](husart);
-    if ((sr & (USART_SR_FE | USART_SR_NE | USART_SR_ORE)) && (cr3 & USART_CR3_EIE) && cb->callbacks[5])
-        cb->callbacks[5](husart);
-    if ((sr & USART_SR_LBD) && (cr2 & USART_CR2_LBDIE) && cb->callbacks[6])
-        cb->callbacks[6](husart);
-    if ((sr & USART_SR_CTS) && (cr3 & USART_CR3_CTSIE) && cb->callbacks[7])
-        cb->callbacks[7](husart);
+    USART_HANDLE_EXIT_IRQ(USART1, YDRV_USART_1);
 }
 
 /**
- * @brief USART2中断处理函数（优化版本）
- * @note 此函数由NVIC调用，使用内联优化提高性能
+ * @brief USART2中断处理函数
  */
 void USART2_IRQHandler(void)
 {
-    yDrvUsartHandle_t *husart = usart_handles[YDRV_USART_2];
-    if (husart == NULL)
-        return;
-
-    uint32_t sr = USART2->SR;
-    uint32_t cr1 = USART2->CR1;
-    uint32_t cr2 = USART2->CR2;
-    uint32_t cr3 = USART2->CR3;
-    yDrvUsartInterrupts_t *cb = &usart_interrupt_handlers[YDRV_USART_2];
-
-    // 按优先级处理中断
-    if ((sr & USART_SR_RXNE) && (cr1 & USART_CR1_RXNEIE) && cb->callbacks[1])
-        cb->callbacks[1](husart);
-    if ((sr & USART_SR_TXE) && (cr1 & USART_CR1_TXEIE) && cb->callbacks[0])
-        cb->callbacks[0](husart);
-    if ((sr & USART_SR_TC) && (cr1 & USART_CR1_TCIE) && cb->callbacks[2])
-        cb->callbacks[2](husart);
-    if ((sr & USART_SR_IDLE) && (cr1 & USART_CR1_IDLEIE) && cb->callbacks[3])
-        cb->callbacks[3](husart);
-    if ((sr & USART_SR_PE) && (cr1 & USART_CR1_PEIE) && cb->callbacks[4])
-        cb->callbacks[4](husart);
-    if ((sr & (USART_SR_FE | USART_SR_NE | USART_SR_ORE)) && (cr3 & USART_CR3_EIE) && cb->callbacks[5])
-        cb->callbacks[5](husart);
-    if ((sr & USART_SR_LBD) && (cr2 & USART_CR2_LBDIE) && cb->callbacks[6])
-        cb->callbacks[6](husart);
-    if ((sr & USART_SR_CTS) && (cr3 & USART_CR3_CTSIE) && cb->callbacks[7])
-        cb->callbacks[7](husart);
+    USART_HANDLE_EXIT_IRQ(USART2, YDRV_USART_2);
 }
 
 /**
- * @brief USART3中断处理函数（优化版本）
- * @note 此函数由NVIC调用，使用内联优化提高性能
+ * @brief USART3/USART4共享中断处理函数
  */
-void USART3_IRQHandler(void)
+void USART3_4_IRQHandler(void)
 {
-    yDrvUsartHandle_t *husart = usart_handles[YDRV_USART_3];
-    if (husart == NULL)
-        return;
+    // 检查是USART3还是USART4产生的中断
+    USART_HANDLE_EXIT_IRQ(USART3, YDRV_USART_3);
 
-    uint32_t sr = USART3->SR;
-    uint32_t cr1 = USART3->CR1;
-    uint32_t cr2 = USART3->CR2;
-    uint32_t cr3 = USART3->CR3;
-    yDrvUsartInterrupts_t *cb = &usart_interrupt_handlers[YDRV_USART_3];
-
-    // 按优先级处理中断
-    if ((sr & USART_SR_RXNE) && (cr1 & USART_CR1_RXNEIE) && cb->callbacks[1])
-        cb->callbacks[1](husart);
-    if ((sr & USART_SR_TXE) && (cr1 & USART_CR1_TXEIE) && cb->callbacks[0])
-        cb->callbacks[0](husart);
-    if ((sr & USART_SR_TC) && (cr1 & USART_CR1_TCIE) && cb->callbacks[2])
-        cb->callbacks[2](husart);
-    if ((sr & USART_SR_IDLE) && (cr1 & USART_CR1_IDLEIE) && cb->callbacks[3])
-        cb->callbacks[3](husart);
-    if ((sr & USART_SR_PE) && (cr1 & USART_CR1_PEIE) && cb->callbacks[4])
-        cb->callbacks[4](husart);
-    if ((sr & (USART_SR_FE | USART_SR_NE | USART_SR_ORE)) && (cr3 & USART_CR3_EIE) && cb->callbacks[5])
-        cb->callbacks[5](husart);
-    if ((sr & USART_SR_LBD) && (cr2 & USART_CR2_LBDIE) && cb->callbacks[6])
-        cb->callbacks[6](husart);
-    if ((sr & USART_SR_CTS) && (cr3 & USART_CR3_CTSIE) && cb->callbacks[7])
-        cb->callbacks[7](husart);
+    USART_HANDLE_EXIT_IRQ(USART4, YDRV_USART_4);
 }
 
+#ifdef USART5
 /**
- * @brief UART4中断处理函数（优化版本）
- * @note 此函数由NVIC调用，使用内联优化提高性能
+ * @brief USART5/USART6共享中断处理函数
  */
-void UART4_IRQHandler(void)
+void USART5_6_IRQHandler(void)
 {
-    yDrvUsartHandle_t *husart = usart_handles[YDRV_USART_4];
-    if (husart == NULL)
-        return;
+    // 检查是USART5还是USART6产生的中断
+    if (exit_callback[YDRV_USART_5].callback != NULL)
+    {
+        USART_HANDLE_EXIT_IRQ(USART5, YDRV_USART_5);
+    }
 
-    uint32_t sr = UART4->SR;
-    uint32_t cr1 = UART4->CR1;
-    uint32_t cr2 = UART4->CR2;
-    uint32_t cr3 = UART4->CR3;
-    yDrvUsartInterrupts_t *cb = &usart_interrupt_handlers[YDRV_USART_4];
-
-    // 按优先级处理中断
-    if ((sr & USART_SR_RXNE) && (cr1 & USART_CR1_RXNEIE) && cb->callbacks[1])
-        cb->callbacks[1](husart);
-    if ((sr & USART_SR_TXE) && (cr1 & USART_CR1_TXEIE) && cb->callbacks[0])
-        cb->callbacks[0](husart);
-    if ((sr & USART_SR_TC) && (cr1 & USART_CR1_TCIE) && cb->callbacks[2])
-        cb->callbacks[2](husart);
-    if ((sr & USART_SR_IDLE) && (cr1 & USART_CR1_IDLEIE) && cb->callbacks[3])
-        cb->callbacks[3](husart);
-    if ((sr & USART_SR_PE) && (cr1 & USART_CR1_PEIE) && cb->callbacks[4])
-        cb->callbacks[4](husart);
-    if ((sr & (USART_SR_FE | USART_SR_NE | USART_SR_ORE)) && (cr3 & USART_CR3_EIE) && cb->callbacks[5])
-        cb->callbacks[5](husart);
-    if ((sr & USART_SR_LBD) && (cr2 & USART_CR2_LBDIE) && cb->callbacks[6])
-        cb->callbacks[6](husart);
-    if ((sr & USART_SR_CTS) && (cr3 & USART_CR3_CTSIE) && cb->callbacks[7])
-        cb->callbacks[7](husart);
+#ifdef USART6
+    if (exit_callback[YDRV_USART_6].callback != NULL)
+    {
+        USART_HANDLE_EXIT_IRQ(USART6, YDRV_USART_6);
+    }
+#endif
 }
-
-/**
- * @brief UART5中断处理函数（优化版本）
- * @note 此函数由NVIC调用，使用内联优化提高性能
- */
-void UART5_IRQHandler(void)
-{
-    yDrvUsartHandle_t *husart = usart_handles[YDRV_USART_5];
-    if (husart == NULL)
-        return;
-
-    uint32_t sr = UART5->SR;
-    uint32_t cr1 = UART5->CR1;
-    uint32_t cr2 = UART5->CR2;
-    uint32_t cr3 = UART5->CR3;
-    yDrvUsartInterrupts_t *cb = &usart_interrupt_handlers[YDRV_USART_5];
-
-    // 按优先级处理中断
-    if ((sr & USART_SR_RXNE) && (cr1 & USART_CR1_RXNEIE) && cb->callbacks[1])
-        cb->callbacks[1](husart);
-    if ((sr & USART_SR_TXE) && (cr1 & USART_CR1_TXEIE) && cb->callbacks[0])
-        cb->callbacks[0](husart);
-    if ((sr & USART_SR_TC) && (cr1 & USART_CR1_TCIE) && cb->callbacks[2])
-        cb->callbacks[2](husart);
-    if ((sr & USART_SR_IDLE) && (cr1 & USART_CR1_IDLEIE) && cb->callbacks[3])
-        cb->callbacks[3](husart);
-    if ((sr & USART_SR_PE) && (cr1 & USART_CR1_PEIE) && cb->callbacks[4])
-        cb->callbacks[4](husart);
-    if ((sr & (USART_SR_FE | USART_SR_NE | USART_SR_ORE)) && (cr3 & USART_CR3_EIE) && cb->callbacks[5])
-        cb->callbacks[5](husart);
-    if ((sr & USART_SR_LBD) && (cr2 & USART_CR2_LBDIE) && cb->callbacks[6])
-        cb->callbacks[6](husart);
-    if ((sr & USART_SR_CTS) && (cr3 & USART_CR3_CTSIE) && cb->callbacks[7])
-        cb->callbacks[7](husart);
-}
-
-/**
- * @brief USART6中断处理函数（优化版本）
- * @note 此函数由NVIC调用，使用内联优化提高性能
- */
-void USART6_IRQHandler(void)
-{
-    yDrvUsartHandle_t *husart = usart_handles[YDRV_USART_6];
-    if (husart == NULL)
-        return;
-
-    uint32_t sr = USART6->SR;
-    uint32_t cr1 = USART6->CR1;
-    uint32_t cr2 = USART6->CR2;
-    uint32_t cr3 = USART6->CR3;
-    yDrvUsartInterrupts_t *cb = &usart_interrupt_handlers[YDRV_USART_6];
-
-    // 按优先级处理中断
-    if ((sr & USART_SR_RXNE) && (cr1 & USART_CR1_RXNEIE) && cb->callbacks[1])
-        cb->callbacks[1](husart);
-    if ((sr & USART_SR_TXE) && (cr1 & USART_CR1_TXEIE) && cb->callbacks[0])
-        cb->callbacks[0](husart);
-    if ((sr & USART_SR_TC) && (cr1 & USART_CR1_TCIE) && cb->callbacks[2])
-        cb->callbacks[2](husart);
-    if ((sr & USART_SR_IDLE) && (cr1 & USART_CR1_IDLEIE) && cb->callbacks[3])
-        cb->callbacks[3](husart);
-    if ((sr & USART_SR_PE) && (cr1 & USART_CR1_PEIE) && cb->callbacks[4])
-        cb->callbacks[4](husart);
-    if ((sr & (USART_SR_FE | USART_SR_NE | USART_SR_ORE)) && (cr3 & USART_CR3_EIE) && cb->callbacks[5])
-        cb->callbacks[5](husart);
-    if ((sr & USART_SR_LBD) && (cr2 & USART_CR2_LBDIE) && cb->callbacks[6])
-        cb->callbacks[6](husart);
-    if ((sr & USART_SR_CTS) && (cr3 & USART_CR3_CTSIE) && cb->callbacks[7])
-        cb->callbacks[7](husart);
-}
+#endif

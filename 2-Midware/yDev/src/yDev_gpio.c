@@ -21,6 +21,8 @@
 #include "yDrv_gpio.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
+#include <stdio.h>
 
 // ==================== GPIO设备操作函数 ====================
 
@@ -44,11 +46,14 @@ static yDevStatus_t yDev_Gpio_Init(void *config, void *handle)
         return YDEV_INVALID_PARAM;
     }
 
-    gpio_handle = handle;
-    gpio_config = config;
+    gpio_handle = (yDevHandle_Gpio_t *)handle;
+    gpio_config = (yDevConfig_Gpio_t *)config;
 
     // 调用底层yDrv初始化GPIO
-    yDrvGpioInitStatic(&gpio_config->drv_config, &gpio_handle->drv_handle);
+    if (yDrvGpioInitStatic(&gpio_config->drv_config, &gpio_handle->drv_handle) != YDRV_OK)
+    {
+        return YDEV_ERROR;
+    }
 
     return YDEV_OK;
 }
@@ -71,12 +76,45 @@ static yDevStatus_t yDev_Gpio_Deinit(void *handle)
         return YDEV_INVALID_PARAM;
     }
 
-    gpio_handle = handle;
+    gpio_handle = (yDevHandle_Gpio_t *)handle;
 
     // 调用底层yDrv反初始化GPIO
-    yDrvGpioDeInitStatic(&gpio_handle->drv_handle);
+    if (yDrvGpioDeInitStatic(&gpio_handle->drv_handle) != YDRV_OK)
+    {
+        return YDEV_ERROR;
+    }
 
     return YDEV_OK;
+}
+
+// ==================== yDev GPIO初始化函数实现 ====================
+
+void yDevGpioConfigStructInit(yDevConfig_Gpio_t *config)
+{
+    if (config == NULL)
+    {
+        return;
+    }
+
+    // 初始化基础配置
+    yDevConfigStructInit(&config->base);
+
+    // 初始化驱动配置
+    yDrvGpioConfigStructInit(&config->drv_config);
+}
+
+void yDevGpioHandleStructInit(yDevHandle_Gpio_t *handle)
+{
+    if (handle == NULL)
+    {
+        return;
+    }
+
+    // 初始化基础句柄
+    yDevHandleStructInit(&handle->base);
+
+    // 初始化驱动句柄
+    yDrvGpioHandleStructInit(&handle->drv_handle);
 }
 
 /**
@@ -90,14 +128,13 @@ static yDevStatus_t yDev_Gpio_Deinit(void *handle)
  * 读取GPIO引脚的当前状态，将状态值写入缓冲区
  * 状态值：0表示低电平，非0表示高电平
  */
-static int32_t yDev_Gpio_Read(void *handle, void *buffer, size_t size)
+static int32_t yDev_Gpio_Read(void *handle, void *buffer, uint16_t size)
 {
     yDevHandle_Gpio_t *gpio_handle;
-    yDrvPinState_t pin_state;
     uint32_t *state_buffer;
 
     // 参数有效性检查
-    if ((handle == NULL) || (buffer == NULL) || (size < sizeof(uint32_t)))
+    if ((handle == NULL) || (buffer == NULL) || (size != sizeof(uint32_t)))
     {
         return -1; // 返回错误
     }
@@ -106,10 +143,7 @@ static int32_t yDev_Gpio_Read(void *handle, void *buffer, size_t size)
     state_buffer = (uint32_t *)buffer;
 
     // 调用底层yDrv读取GPIO引脚状态
-    pin_state = yDrvGpioRead(&gpio_handle->drv_handle);
-
-    // 将状态写入缓冲区
-    *state_buffer = (uint32_t)pin_state;
+    *state_buffer = (uint32_t)yDrvGpioRead(&gpio_handle->drv_handle);
 
     return sizeof(uint32_t); // 返回实际读取的字节数
 }
@@ -125,7 +159,7 @@ static int32_t yDev_Gpio_Read(void *handle, void *buffer, size_t size)
  * 设置GPIO引脚的输出状态
  * 写入值：0设置为低电平，非0设置为高电平
  */
-static int32_t yDev_Gpio_Write(void *handle, const void *buffer, size_t size)
+static int32_t yDev_Gpio_Write(void *handle, const void *buffer, uint16_t size)
 {
     yDevHandle_Gpio_t *gpio_handle;
     const uint32_t *state_buffer;
@@ -133,7 +167,7 @@ static int32_t yDev_Gpio_Write(void *handle, const void *buffer, size_t size)
     yDrvStatus_t result;
 
     // 参数有效性检查
-    if ((handle == NULL) || (buffer == NULL) || (size < sizeof(uint32_t)))
+    if ((handle == NULL) || (buffer == NULL) || (size != sizeof(uint32_t)))
     {
         return -1; // 返回错误
     }

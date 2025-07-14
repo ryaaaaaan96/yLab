@@ -12,7 +12,9 @@ cmake_minimum_required(VERSION 3.22)
 # ------------------------------------------------------------------------------
 
 # 添加子模块驱动库
-add_subdirectory(led)
+add_subdirectory(device)
+add_subdirectory(task)
+
 
 
 
@@ -27,7 +29,8 @@ add_library(main
 
 target_link_libraries(main 
     PRIVATE 
-        APP_Led_Interface
+        APP_Task_Interface
+        APP_Device_Interface
         middleware
 )
 

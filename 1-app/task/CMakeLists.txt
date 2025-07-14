@@ -11,9 +11,8 @@ cmake_minimum_required(VERSION 3.22)
 # ------------------------------------------------------------------------------
 
 # 应用程序源文件列表
-set(APP_LED_SOURCES
+set(APP_TASK_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/blink.c     # 主程序文件
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/switch.c     # 主程序文件
 )
 
 # ------------------------------------------------------------------------------
@@ -21,7 +20,7 @@ set(APP_LED_SOURCES
 # ------------------------------------------------------------------------------
 
 # 应用程序包含路径
-set(APP_LED_INCLUDE_DIRS
+set(APP_TASK_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}                         # 应用程序头文件目录
     ${CMAKE_CURRENT_SOURCE_DIR}/inc/
 )
@@ -31,34 +30,36 @@ set(APP_LED_INCLUDE_DIRS
 # ------------------------------------------------------------------------------
 
 # 将应用程序源文件添加到主可执行文件
-add_library(APP_Led_Interface
+add_library(APP_Task_Interface
     INTERFACE
 )
 
 # 将应用程序包含路径添加到主项目
-target_include_directories(APP_Led_Interface
+target_include_directories(APP_Task_Interface
     INTERFACE
-        ${APP_LED_INCLUDE_DIRS}
+        ${APP_TASK_INCLUDE_DIRS}
 )
-target_link_libraries(APP_Led_Interface
+target_link_libraries(APP_Task_Interface
     INTERFACE
         middleware                 # STM32平台接口库（包含编译选项和宏定义）
+        APP_Device_Interface
 )
 
 
 # 将应用程序源文件添加到主可执行文件
-add_library(APP_Led
+add_library(APP_Task
     STATIC
-        ${APP_LED_SOURCES}
+        ${APP_TASK_SOURCES}
 )
 
-target_link_libraries(APP_Led
+target_link_libraries(APP_Task
     PRIVATE
-        APP_Led_Interface                 # STM32平台接口库（包含编译选项和宏定义）
+        APP_Task_Interface                 # 提供头文件和接口依赖
+        APP_Device                # 添加这一行，链接到 APP_Device 库的实现
 )
 
 target_link_libraries(${CMAKE_PROJECT_NAME} 
     PRIVATE
-        APP_Led                 # STM32平台接口库（包含编译选项和宏定义）
+        APP_Task                 # STM32平台接口库（包含编译选项和宏定义）
 )
 

@@ -56,6 +56,9 @@ set(Hal_Src
     # 内核相关驱动
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_hal_cortex.c    # Cortex-M0+内核HAL驱动
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_hal.c           # HAL核心驱动（初始化等）
+    
+    # 串口通信相关驱动
+    ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_ll_usart.c      # USART LL驱动（低层驱动）
 )
 
 # ------------------------------------------------------------------------------

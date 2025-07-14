@@ -46,6 +46,46 @@ extern "C"
         yDrvGpioHandle_t drv_handle; /**< GPIO驱动句柄 */
     } yDevHandle_Gpio_t;
 
+// ==================== yDev GPIO配置初始化宏 ====================
+
+/**
+ * @brief yDev GPIO配置结构体默认初始化宏
+ * @note 提供最常用的默认配置，适用于输入模式
+ */
+#define YDEV_GPIO_CONFIG_DEFAULT()                 \
+    ((yDevConfig_Gpio_t)                          \
+    {                                              \
+        .base = YDEV_CONFIG_DEFAULT(),             \
+        .drv_config = YDRV_GPIO_CONFIG_DEFAULT(),  \
+    })
+
+/**
+ * @brief yDev GPIO句柄结构体默认初始化宏
+ * @note 提供安全的默认初始化值
+ */
+#define YDEV_GPIO_HANDLE_DEFAULT()                 \
+    ((yDevHandle_Gpio_t)                          \
+    {                                              \
+        .base = YDEV_HANDLE_DEFAULT(),             \
+        .drv_handle = YDRV_GPIO_HANDLE_DEFAULT(),  \
+    })
+
+    // ==================== yDev GPIO初始化函数 ====================
+
+    /**
+     * @brief 初始化yDev GPIO配置结构体为默认值
+     * @param config 配置结构体指针
+     * @retval 无
+     */
+    void yDevGpioConfigStructInit(yDevConfig_Gpio_t *config);
+
+    /**
+     * @brief 初始化yDev GPIO句柄结构体为默认值
+     * @param handle 句柄结构体指针
+     * @retval 无
+     */
+    void yDevGpioHandleStructInit(yDevHandle_Gpio_t *handle);
+
     // ==================== GPIO设备IOCTL命令定义 ====================
 
     /**

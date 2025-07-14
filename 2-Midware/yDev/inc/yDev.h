@@ -113,7 +113,7 @@ extern "C"
      * @param size 读取大小
      * @retval 实际读取的字节数，负数表示错误
      */
-    typedef int32_t (*yDevReadFunc_t)(void *handle, void *buffer, size_t size);
+    typedef int32_t (*yDevReadFunc_t)(void *handle, void *buffer, uint16_t size);
 
     /**
      * @brief 设备写入函数指针
@@ -122,7 +122,7 @@ extern "C"
      * @param size 写入大小
      * @retval 实际写入的字节数，负数表示错误
      */
-    typedef int32_t (*yDevWriteFunc_t)(void *handle, const void *buffer, size_t size);
+    typedef int32_t (*yDevWriteFunc_t)(void *handle, const void *buffer, uint16_t size);
 
     /**
      * @brief 设备控制函数指针
@@ -156,6 +156,7 @@ extern "C"
     typedef struct
     {
         yDevType_t type; // 设备类型
+        uint32_t timeOutMs;
         // uint32_t use_mutex; // 是否使用锁
     } yDevConfig_t;
 
@@ -165,8 +166,29 @@ extern "C"
     typedef struct
     {
         uint32_t index;
+        uint32_t timeOutMs;
+
         // void *mutex; // 互斥锁（可选）
     } yDevHandle_t;
+
+// ==================== yDev基础配置初始化宏 ====================
+
+/**
+ * @brief yDev配置结构体默认初始化宏
+ */
+#define YDEV_CONFIG_DEFAULT()  \
+    ((yDevConfig_t){           \
+        .type = YDEV_TYPE_MAX, \
+    })
+
+/**
+ * @brief yDev句柄结构体默认初始化宏
+ */
+#define YDEV_HANDLE_DEFAULT() \
+    ((yDevHandle_t){          \
+        .index = 0,           \
+        .timeOutMs = 0,       \
+    })
 
 // ==================== IOCTL命令定义 ====================
 
@@ -176,7 +198,6 @@ extern "C"
 #define YDEV_IOCTL_BASE 0x8000
 #define YDEV_IOCTL_GET_STATUS (YDEV_IOCTL_BASE + 0)
 #define YDEV_IOCTL_RESET (YDEV_IOCTL_BASE + 1)
-
 
     // ==================== 核心API函数 ====================
 
@@ -223,6 +244,9 @@ extern "C"
     yDevStatus_t yDevIoctl(void *handle, uint32_t cmd, void *arg);
 
     yDevStatus_t yLabInit(void);
+
+    size_t yDevGetTimeMS(void);
+
 #ifdef __cplusplus
 }
 #endif

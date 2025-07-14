@@ -20,6 +20,7 @@ set(yDrv_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/src/yDrv_basic.c        
     ${CMAKE_CURRENT_SOURCE_DIR}/src/yDrv_gpio.c        
     ${CMAKE_CURRENT_SOURCE_DIR}/src/yDrv.c        
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/yDrv_usart.c        
 )
 
 # ------------------------------------------------------------------------------

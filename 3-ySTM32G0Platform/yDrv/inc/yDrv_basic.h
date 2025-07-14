@@ -50,7 +50,9 @@ extern "C"
     // GPIO引脚编号枚举 (适配STM32G0系列)
     typedef enum
     {
-        YDRV_PINA0 = (0U),
+        YDRV_PINNULL = (0U),
+
+        YDRV_PINA0,
         YDRV_PINA1,
         YDRV_PINA2,
         YDRV_PINA3,
@@ -161,8 +163,9 @@ extern "C"
     typedef struct
     {
         GPIO_TypeDef *port; // GPIO端口寄存器指针
-        uint32_t pin;       // GPIO引脚位掩码
-        uint8_t pinNumber;  // GPIO引脚编号(0-15)
+        uint16_t pinMask;   // GPIO引脚位掩码
+        uint8_t pinIndex;   // GPIO的引脚
+        uint8_t flag;       // GPIO的引脚
     } yDrvGpioInfo_t;
 
     // ==================== 回调函数结构体 ====================

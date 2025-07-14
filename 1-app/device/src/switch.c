@@ -21,7 +21,7 @@ static yDevConfig_Gpio_t switch_config[SWITCH_TYPE_MAX] = {
             .pin = YDRV_PINC8,
             .mode = YDRV_GPIO_MODE_OUTPUT_OD,
             .pupd = YDRV_GPIO_PUPD_NONE,
-            .speed = YDRV_GPIO_SPEED_LOW,
+            .speed = YDRV_GPIO_SPEED_LEVEL0,
         },
     },
     [SWITCH_TYPE_BUTTON] = {
@@ -32,33 +32,21 @@ static yDevConfig_Gpio_t switch_config[SWITCH_TYPE_MAX] = {
             .pin = YDRV_PINC0,
             .mode = YDRV_GPIO_MODE_INPUT,
             .pupd = YDRV_GPIO_PUPD_PULLUP,
-            .speed = YDRV_GPIO_SPEED_HIGH,
+            .speed = YDRV_GPIO_SPEED_LEVEL3,
         },
     },
 };
 
-static yDevHandle_Gpio_t switch_handle[SWITCH_TYPE_MAX] =
-    {
-        [SWITCH_TYPE_LED] =
-            {
-                .base = {0},
-                .drv_handle = {0},
-            },
-        [SWITCH_TYPE_BUTTON] =
-            {
-                .base = {0},
-                .drv_handle = {0},
-            },
-};
+static yDevHandle_Gpio_t switch_handle[SWITCH_TYPE_MAX];
 
 static uint32_t log_flag;
 static uint32_t log_time;
 
 static void button_log(void *arg);
 
-static yDrvGpioExit_t button_exit =
+static yDrvGpioExtiConfig_t button_exit =
     {
-        .trigger = YDRV_EXTI_TRIGGER_FALLING,
+        .trigger = YDRV_GPIO_EXTI_TRIGGER_FALLING,
         .prio = 1,
         .arg = &switch_handle[SWITCH_TYPE_BUTTON],
         .function = button_log,

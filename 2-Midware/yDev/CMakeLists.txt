@@ -18,6 +18,7 @@ set(YDEV_INC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/inc)
 set(yDev_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/src/yDev.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/yDev_gpio.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/yDev_usart.c
 )
 
 # ------------------------------------------------------------------------------
@@ -41,7 +42,15 @@ target_link_libraries(yDev_Interface
 # ------------------------------------------------------------------------------
 
 # 创建 yDev 目标文件库
-add_library(yDev OBJECT ${yDev_Src})
+add_library(yDev 
+    OBJECT 
+        ${yDev_Src}
+)
+
+target_include_directories(yDev 
+    PRIVATE 
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
 
 # 链接接口库
 target_link_libraries(yDev 
