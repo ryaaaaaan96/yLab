@@ -1,24 +1,34 @@
-/*
+/**
  * @file yDrv_usart.c
  * @brief STM32G0 USART驱动程序实现
  * @version 2.0
  * @date 2025
  * @author YLab Development Team
+ *
+ * @par 功能描述:
+ * 实现STM32G0系列MCU的USART/UART驱动程序，提供完整的串口通信功能
+ *
+ * @par 主要功能:
+ * - USART硬件初始化和配置
+ * - 数据发送和接收功能
+ * - 中断管理和回调处理
+ * - GPIO引脚复用功能配置
+ * - 错误处理和状态查询
  */
 
 #include <string.h> // For memset
-
 #include "yDrv_usart.h"
+
 // ==================== 私有定义 ====================
 
 /**
- * @brief 中断回调函数存储结构
- * @note 用于存储每个USART实例的中断回调函数
+ * @brief USART中断回调函数存储结构
+ * @note 用于存储每个USART实例的中断回调函数和标志
  */
 struct
 {
-    yDrvInterruptCallback_t callback[YDRV_USART_EXTI_MAX]; // 对应
-    uint8_t flags[YDRV_USART_EXTI_MAX];
+    yDrvInterruptCallback_t callback[YDRV_USART_EXTI_MAX]; /*!< 中断回调函数数组 */
+    uint8_t flags[YDRV_USART_EXTI_MAX];                    /*!< 中断标志数组 */
 } exit_callback[YDRV_USART_MAX];
 
 // ==================== 私有函数声明 ====================
@@ -26,18 +36,25 @@ struct
 /**
  * @brief 使能指定USART的时钟
  * @param usartId USART实例ID
+ * @retval 无
+ * @note 根据USART实例启用对应的外设时钟
  */
 static void prv_EnableClock(yDrvUsartId_t usartId);
 
 /**
  * @brief 禁用指定USART的时钟
  * @param usartId USART实例ID
+ * @retval 无
+ * @note 根据USART实例禁用对应的外设时钟
  */
 static void prv_DisableClock(yDrvUsartId_t usartId);
 
 /**
- * @brief 获取实例
+ * @brief 获取USART实例信息
  * @param usartId USART实例ID
+ * @param handle USART句柄指针
+ * @retval 无
+ * @note 根据实例ID填充句柄中的硬件信息
  */
 static void yDrvUsartGetInstance(yDrvUsartId_t usartId,
                                  yDrvUsartHandle_t *handle);
@@ -46,7 +63,8 @@ static void yDrvUsartGetInstance(yDrvUsartId_t usartId,
  * @brief 配置USART相关的GPIO引脚
  * @param config USART配置结构指针
  * @param handle USART句柄指针
- * @return yDrvStatus_t 状态码
+ * @retval yDrvStatus_t 操作状态
+ * @note 配置TX、RX、RTS、CTS引脚的复用功能
  */
 static yDrvStatus_t prv_ConfigGpio(const yDrvUsartConfig_t *config, yDrvUsartHandle_t *handle);
 
@@ -335,10 +353,10 @@ void yDrvUsartSendLinBreak(yDrvUsartHandle_t *handle)
 // ==================== 中断管理函数实现 ====================
 
 yDrvStatus_t yDrvUsartRegisterCallback(yDrvUsartHandle_t *handle,
-                                       yDrvUsartExtiConfig_t exit)
+                                       yDrvUsartExtiConfig_t *exti)
 {
     // 参数有效性检查
-    if (handle == NULL || handle->instance == NULL)
+    if (handle == NULL || handle->instance == NULL || exti == NULL)
     {
         return YDRV_INVALID_PARAM;
     }
@@ -350,18 +368,18 @@ yDrvStatus_t yDrvUsartRegisterCallback(yDrvUsartHandle_t *handle,
     }
 
     // 检查中断类型是否有效
-    if (exit.trigger >= YDRV_USART_EXTI_MAX)
+    if (exti->trigger >= YDRV_USART_EXTI_MAX)
     {
         return YDRV_INVALID_PARAM;
     }
 
     // 存储回调函数和参数
-    exit_callback[handle->usartId].callback[exit.trigger].function = exit.function;
-    exit_callback[handle->usartId].callback[exit.trigger].arg = exit.arg;
-    exit_callback[handle->usartId].flags[exit.trigger] = exit.enable;
+    exit_callback[handle->usartId].callback[exti->trigger].function = exti->function;
+    exit_callback[handle->usartId].callback[exti->trigger].arg = exti->arg;
+    exit_callback[handle->usartId].flags[exti->trigger] = exti->enable;
 
     // 根据中断类型使能对应的硬件中断
-    switch (exit.trigger)
+    switch (exti->trigger)
     {
     case YDRV_USART_EXTI_TXE:
         LL_USART_EnableIT_TXE(handle->instance);
@@ -400,9 +418,9 @@ yDrvStatus_t yDrvUsartRegisterCallback(yDrvUsartHandle_t *handle,
     }
 
     // 设置中断优先级
-    NVIC_SetPriority(handle->IRQ, exit.prio);
+    NVIC_SetPriority(handle->IRQ, exti->prio);
 
-    if (exit.enable)
+    if (exti->enable)
     { // 使能NVIC中断
         NVIC_EnableIRQ(handle->IRQ);
     }
@@ -690,6 +708,90 @@ static void prv_DeInitGpio(yDrvUsartHandle_t *handle)
         LL_GPIO_Init(handle->ctsPinInfo.port, &gpio_init);
         handle->ctsPinInfo.flag = 0;
     }
+}
+
+yDrvStatus_t yDrvUsartDmaWrite(yDrvUsartHandle_t *handle, yDrvDmaChannel_t *channel)
+{
+    yDrvDmaInfo_t dma_info;
+
+    // 参数有效性检查
+    if (handle == NULL || channel == NULL)
+    {
+        return YDRV_INVALID_PARAM;
+    }
+
+    yDrvParseDma(*channel, &dma_info);
+    LL_DMA_SetPeriphAddress(DMA1,
+                            LL_DMA_CHANNEL_5,
+                            LL_USART_DMA_GetRegAddr(handle->instance, LL_USART_DMA_REG_DATA_TRANSMIT));
+    LL_DMA_SetPeriphSize(dma_info.dma,
+                         dma_info.channel,
+                         LL_DMA_PDATAALIGN_BYTE);
+    LL_DMA_SetPeriphIncMode(dma_info.dma,
+                            dma_info.channel, LL_DMA_PERIPH_NOINCREMENT); // 配置优先级
+    switch (handle->usartId)
+    {
+    case YDRV_USART_1:
+        LL_DMA_SetPeriphRequest(dma_info.dma,
+                                dma_info.channel,
+                                LL_DMAMUX_REQ_USART1_TX); // 配置DMAMUX请求信号
+        return YDRV_OK;
+    case YDRV_USART_2:
+        LL_DMA_SetPeriphRequest(dma_info.dma,
+                                dma_info.channel,
+                                LL_DMAMUX_REQ_USART2_TX); // 配置DMAMUX请求信号
+        return YDRV_OK;
+    case YDRV_USART_3:
+        LL_DMA_SetPeriphRequest(dma_info.dma,
+                                dma_info.channel,
+                                LL_DMAMUX_REQ_USART3_TX); // 配置DMAMUX请求信号
+        return YDRV_OK;
+    default:
+        return YDRV_ERROR;
+    }
+    return YDRV_INVALID_PARAM;
+}
+
+yDrvStatus_t yDrvUsartDmaRead(yDrvUsartHandle_t *handle, yDrvDmaChannel_t *channel)
+{
+    yDrvDmaInfo_t dma_info;
+
+    if (yDrvParseDma(*channel, &dma_info) != YDRV_OK)
+    {
+        return YDRV_INVALID_PARAM;
+    }
+    LL_DMA_SetPeriphAddress(dma_info.dma,
+                            dma_info.channel,
+                            LL_USART_DMA_GetRegAddr(handle->instance, LL_USART_DMA_REG_DATA_RECEIVE));
+    LL_DMA_SetPeriphSize(dma_info.dma,
+                         dma_info.channel,
+                         LL_DMA_PDATAALIGN_BYTE);
+    LL_DMA_SetPeriphIncMode(dma_info.dma,
+                            dma_info.channel,
+                            LL_DMA_PERIPH_NOINCREMENT); // 配置优先级
+    // 启用USART的DMA接收
+    LL_USART_EnableDMAReq_RX(handle->instance);
+    switch (handle->usartId)
+    {
+    case YDRV_USART_1:
+        LL_DMA_SetPeriphRequest(dma_info.dma,
+                                dma_info.channel,
+                                LL_DMAMUX_REQ_USART1_RX); // 配置DMAMUX请求信号
+        return YDRV_OK;
+    case YDRV_USART_2:
+        LL_DMA_SetPeriphRequest(dma_info.dma,
+                                dma_info.channel,
+                                LL_DMAMUX_REQ_USART2_RX); // 配置DMAMUX请求信号
+        return YDRV_OK;
+    case YDRV_USART_3:
+        LL_DMA_SetPeriphRequest(dma_info.dma,
+                                dma_info.channel,
+                                LL_DMAMUX_REQ_USART3_RX); // 配置DMAMUX请求信号
+        return YDRV_OK;
+    default:
+        return YDRV_ERROR;
+    }
+    return YDRV_OK;
 }
 
 // // ==================== 中断处理函数（优化版本） ====================

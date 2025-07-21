@@ -241,18 +241,98 @@ static yDevStatus_t yDev_Usart_Ioctl(void *handle, uint32_t cmd, void *arg)
 
     switch (cmd)
     {
-    case YDEV_USART_IOCTL_SET_BAUDRATE:
+    case YDEV_USART_IOCTL_SET_INTERRUPT:
         if (arg != NULL)
         {
-            (void)usart_handle;
+            if (yDrvUsartRegisterCallback(&usart_handle->drv_handle, ((yDrvUsartExtiConfig_t *)arg)) != YDRV_OK)
+            {
+                return YDEV_ERROR;
+            }
             return YDEV_OK;
         }
         return YDEV_INVALID_PARAM;
-
-    case YDEV_USART_IOCTL_GET_BAUDRATE:
-        // 注意：yDrv层没有提供获取波特率的接口，这里返回不支持
-        return YDEV_NOT_SUPPORTED;
-
+    case YDEV_USART_IOCTL_RESET_INTERRUPT:
+        if (arg != NULL)
+        {
+            if (yDrvUsartUnregisterCallback(&usart_handle->drv_handle, *((yDrvUsartExti_t *)arg)) != YDRV_OK)
+            {
+                return YDEV_ERROR;
+            }
+            return YDEV_OK;
+        }
+        return YDEV_INVALID_PARAM;
+    case YDEV_USART_IOCTL_ENABLE_INTERRUPT:
+        if (arg != NULL)
+        {
+            yDrvUsartEnableInterrupt(&usart_handle->drv_handle);
+            return YDEV_OK;
+        }
+        return YDEV_INVALID_PARAM;
+    case YDEV_USART_IOCTL_DISABLE_INTERRUPT:
+        if (arg != NULL)
+        {
+            yDrvUsartDisableInterrupt(&usart_handle->drv_handle);
+            return YDEV_OK;
+        }
+        return YDEV_INVALID_PARAM;
+    case YDEV_USART_IOCTL_SET_SEND_DMA:
+        if (arg != NULL)
+        {
+            if (yDrvDmaInitStatic((yDrvDmaConfig_t *)arg,
+                                  &usart_handle->tx_dma_handle,
+                                  YDRV_DMA_DIR_M2P) != YDRV_OK)
+            {
+                return YDEV_ERROR;
+            }
+            if (yDrvUsartDmaWrite(&usart_handle->drv_handle,
+                                  (yDrvDmaChannel_t *)arg) != YDRV_OK)
+            {
+                return YDEV_ERROR;
+            }
+            return YDEV_OK;
+        }
+        return YDEV_INVALID_PARAM;
+    case YDEV_USART_IOCTL_SET_RECEIVE_DMA:
+        if (arg != NULL)
+        {
+            if (yDrvDmaInitStatic((yDrvDmaConfig_t *)arg,
+                                  &usart_handle->rx_dma_handle,
+                                  YDRV_DMA_DIR_P2M) != YDRV_OK)
+            {
+                return YDEV_ERROR;
+            }
+            if (yDrvUsartDmaRead(&usart_handle->drv_handle,
+                                 (yDrvDmaChannel_t *)arg) != YDRV_OK)
+            {
+                return YDEV_ERROR;
+            }
+            return YDEV_OK;
+        }
+        return YDEV_INVALID_PARAM;
+    case YDEV_USART_IOCTL_ENABLE_SEND_DMA:
+        if (yDrvDmaTransEnable(&usart_handle->tx_dma_handle) != YDRV_OK)
+        {
+            return YDEV_ERROR;
+        }
+        return YDEV_OK;
+    case YDEV_USART_IOCTL_ENABLE_RECEIVE_DMA:
+        if (yDrvDmaTransEnable(&usart_handle->rx_dma_handle) != YDRV_OK)
+        {
+            return YDEV_ERROR;
+        }
+        return YDEV_OK;
+    case YDEV_USART_IOCTL_DISABLE_SEND_DMA:
+        if (yDrvDmaTransDisable(&usart_handle->tx_dma_handle) != YDRV_OK)
+        {
+            return YDEV_ERROR;
+        }
+        return YDEV_OK;
+    case YDEV_USART_IOCTL_DISABLE_RECEIVE_DMA:
+        if (yDrvDmaTransDisable(&usart_handle->rx_dma_handle) != YDRV_OK)
+        {
+            return YDEV_ERROR;
+        }
+        return YDEV_OK;
     default:
         return YDEV_NOT_SUPPORTED;
     }

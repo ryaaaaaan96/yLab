@@ -1,15 +1,15 @@
 /**
  * @file yDrv_usart.h
- * @brief STM32F4 USART驱动程序头文件
+ * @brief STM32G0 USART驱动程序头文件
  * @version 2.0
  * @date 2025
  * @author YLab Development Team
  *
  * @par 功能描述:
- * 提供STM32F4系列MCU的USART/UART通用驱动接口，支持多种工作模式和配置选项
+ * 提供STM32G0系列MCU的USART/UART通用驱动接口，支持多种工作模式和配置选项
  *
  * @par 主要特性:
- * - 支持USART1-6和UART4-5
+ * - 支持USART1-6和UART4-5 (根据具体型号)
  * - 支持多种工作模式：UART、同步、智能卡、单线、IrDA、LIN
  * - 支持硬件流控制（RTS/CTS）
  * - 完整的中断管理系统
@@ -18,7 +18,7 @@
  * - 非阻塞式数据传输接口
  *
  * @par 更新历史:
- * - v2.0 (2025): 添加完整的中断管理支持，优化API接口一致性
+ * - v2.0 (2025): 完整的STM32G0 USART驱动实现，支持中断管理和优化API
  * - v1.0 (2024): 初始版本，支持基本的轮询模式操作
  */
 
@@ -38,96 +38,120 @@ extern "C"
 #include "yDrv_basic.h"
     // ==================== USART配置枚举 ====================
 
-    // USART实例枚举
+    /**
+     * @brief USART实例枚举
+     * @note 定义STM32G0系列可用的USART/UART实例
+     */
     typedef enum
     {
-        YDRV_USART_1 = 0,
-        YDRV_USART_2,
-        YDRV_USART_3,
-        YDRV_USART_4,
+        YDRV_USART_1 = 0, /*!< USART1实例 */
+        YDRV_USART_2,     /*!< USART2实例 */
+        YDRV_USART_3,     /*!< USART3实例 */
+        YDRV_USART_4,     /*!< USART4实例 */
 #ifdef USART5
-        YDRV_USART_5,
+        YDRV_USART_5, /*!< USART5实例 */
 #endif
 #ifdef USART6
-        YDRV_USART_6,
+        YDRV_USART_6, /*!< USART6实例 */
 #endif
-        YDRV_USART_MAX
+        YDRV_USART_MAX /*!< USART实例数量上限 */
     } yDrvUsartId_t;
 
-    // 数据位枚举
+    /**
+     * @brief USART数据位枚举
+     * @note 定义USART数据帧的位宽
+     */
     typedef enum
     {
-        YDRV_USART_DATA_7BIT = LL_USART_DATAWIDTH_7B,
-        YDRV_USART_DATA_8BIT = LL_USART_DATAWIDTH_8B,
-        YDRV_USART_DATA_9BIT = LL_USART_DATAWIDTH_9B,
+        YDRV_USART_DATA_7BIT = LL_USART_DATAWIDTH_7B, /*!< 7位数据位 */
+        YDRV_USART_DATA_8BIT = LL_USART_DATAWIDTH_8B, /*!< 8位数据位 */
+        YDRV_USART_DATA_9BIT = LL_USART_DATAWIDTH_9B, /*!< 9位数据位 */
     } yDrvUsartDataBits_t;
 
-    // 停止位枚举
+    /**
+     * @brief USART停止位枚举
+     * @note 定义USART数据帧的停止位数量
+     */
     typedef enum
     {
-        YDRV_USART_STOP_0_5BIT = LL_USART_STOPBITS_0_5,
-        YDRV_USART_STOP_1BIT = LL_USART_STOPBITS_1,
-        YDRV_USART_STOP_1_5BIT = LL_USART_STOPBITS_1_5,
-        YDRV_USART_STOP_2BIT = LL_USART_STOPBITS_2,
+        YDRV_USART_STOP_0_5BIT = LL_USART_STOPBITS_0_5, /*!< 0.5个停止位 */
+        YDRV_USART_STOP_1BIT = LL_USART_STOPBITS_1,     /*!< 1个停止位 */
+        YDRV_USART_STOP_1_5BIT = LL_USART_STOPBITS_1_5, /*!< 1.5个停止位 */
+        YDRV_USART_STOP_2BIT = LL_USART_STOPBITS_2,     /*!< 2个停止位 */
     } yDrvUsartStopBits_t;
 
-    // 校验位枚举
+    /**
+     * @brief USART校验位枚举
+     * @note 定义USART数据帧的校验方式
+     */
     typedef enum
     {
-        YDRV_USART_PARITY_NONE = LL_USART_PARITY_NONE,
-        YDRV_USART_PARITY_EVEN = LL_USART_PARITY_EVEN,
-        YDRV_USART_PARITY_ODD = LL_USART_PARITY_ODD
+        YDRV_USART_PARITY_NONE = LL_USART_PARITY_NONE, /*!< 无校验 */
+        YDRV_USART_PARITY_EVEN = LL_USART_PARITY_EVEN, /*!< 偶校验 */
+        YDRV_USART_PARITY_ODD = LL_USART_PARITY_ODD    /*!< 奇校验 */
     } yDrvUsartParity_t;
 
-    // 传输方向枚举
+    /**
+     * @brief USART传输方向枚举
+     * @note 定义USART的工作方向
+     */
     typedef enum
     {
-        YDRV_USART_DIR_TX = LL_USART_DIRECTION_TX,
-        YDRV_USART_DIR_RX = LL_USART_DIRECTION_RX,
-        YDRV_USART_DIR_TX_RX = LL_USART_DIRECTION_TX_RX
+        YDRV_USART_DIR_TX = LL_USART_DIRECTION_TX,      /*!< 仅发送 */
+        YDRV_USART_DIR_RX = LL_USART_DIRECTION_RX,      /*!< 仅接收 */
+        YDRV_USART_DIR_TX_RX = LL_USART_DIRECTION_TX_RX /*!< 收发双向 */
     } yDrvUsartDirection_t;
 
-    // 硬件流控枚举
+    /**
+     * @brief USART硬件流控枚举
+     * @note 定义USART的硬件流控制选项
+     */
     typedef enum
     {
-        YDRV_USART_FLOW_NONE = LL_USART_HWCONTROL_NONE,
-        YDRV_USART_FLOW_RTS = LL_USART_HWCONTROL_RTS,
-        YDRV_USART_FLOW_CTS = LL_USART_HWCONTROL_CTS,
-        YDRV_USART_FLOW_RTS_CTS = LL_USART_HWCONTROL_RTS_CTS
+        YDRV_USART_FLOW_NONE = LL_USART_HWCONTROL_NONE,      /*!< 无硬件流控 */
+        YDRV_USART_FLOW_RTS = LL_USART_HWCONTROL_RTS,        /*!< 仅RTS流控 */
+        YDRV_USART_FLOW_CTS = LL_USART_HWCONTROL_CTS,        /*!< 仅CTS流控 */
+        YDRV_USART_FLOW_RTS_CTS = LL_USART_HWCONTROL_RTS_CTS /*!< RTS+CTS流控 */
     } yDrvUsartFlowControl_t;
 
-    // USART工作模式枚举
+    /**
+     * @brief USART工作模式枚举
+     * @note 定义USART的各种工作模式
+     */
     typedef enum
     {
-        YDRV_USART_MODE_ASYNCHRONOUS = 0, // 标准UART模式
-        YDRV_USART_MODE_SYNCHRONOUS,      // 同步模式（带时钟输出）
-        YDRV_USART_MODE_SMARTCARD,        // 智能卡模式
-        YDRV_USART_MODE_SINGLE_WIRE,      // 单线半双工模式
-        YDRV_USART_MODE_IRDA,             // IrDA红外模式
-        YDRV_USART_MODE_LIN               // LIN总线模式
+        YDRV_USART_MODE_ASYNCHRONOUS = 0, /*!< 标准UART异步模式 */
+        YDRV_USART_MODE_SYNCHRONOUS,      /*!< 同步模式（带时钟输出） */
+        YDRV_USART_MODE_SMARTCARD,        /*!< 智能卡模式 */
+        YDRV_USART_MODE_SINGLE_WIRE,      /*!< 单线半双工模式 */
+        YDRV_USART_MODE_IRDA,             /*!< IrDA红外模式 */
+        YDRV_USART_MODE_LIN               /*!< LIN总线模式 */
     } yDrvUsartMode_t;
 
     // ==================== USART配置结构体 ====================
 
-    // USART初始化配置结构体
+    /**
+     * @brief USART初始化配置结构体
+     * @note 包含USART初始化所需的全部配置参数
+     */
     typedef struct
     {
-        yDrvUsartId_t usartId;              // USART实例名称
-        yDrvGpioPin_t txPin;                // TX引脚配置
-        yDrvGpioPin_t rxPin;                // RX引脚配置
-        yDrvGpioPin_t rtsPin;               // RTS引脚配置
-        yDrvGpioPin_t ctsPin;               // CTS引脚配置
-        uint32_t baudRate;                  // 波特率
-        yDrvUsartDataBits_t dataBits;       // 数据位
-        yDrvUsartStopBits_t stopBits;       // 停止位
-        yDrvUsartParity_t parity;           // 校验位
-        yDrvUsartDirection_t direction;     // 传输方向
-        yDrvUsartFlowControl_t flowControl; // 硬件流控
-        yDrvUsartMode_t mode;               // 工作模式
-        uint8_t txAF;                       // 复用引脚
-        uint8_t rxAF;                       // 复用引脚
-        uint8_t ctsAF;                      // 复用引脚
-        uint8_t rtsAF;                      // 复用引脚
+        yDrvUsartId_t usartId;              /*!< USART实例ID */
+        yDrvGpioPin_t txPin;                /*!< TX发送引脚配置 */
+        yDrvGpioPin_t rxPin;                /*!< RX接收引脚配置 */
+        yDrvGpioPin_t rtsPin;               /*!< RTS流控引脚配置 */
+        yDrvGpioPin_t ctsPin;               /*!< CTS流控引脚配置 */
+        uint32_t baudRate;                  /*!< 波特率设置 */
+        yDrvUsartDataBits_t dataBits;       /*!< 数据位数设置 */
+        yDrvUsartStopBits_t stopBits;       /*!< 停止位数设置 */
+        yDrvUsartParity_t parity;           /*!< 校验位设置 */
+        yDrvUsartDirection_t direction;     /*!< 传输方向设置 */
+        yDrvUsartFlowControl_t flowControl; /*!< 硬件流控设置 */
+        yDrvUsartMode_t mode;               /*!< USART工作模式 */
+        uint8_t txAF;                       /*!< TX引脚复用功能选择 */
+        uint8_t rxAF;                       /*!< RX引脚复用功能选择 */
+        uint8_t ctsAF;                      /*!< CTS引脚复用功能选择 */
+        uint8_t rtsAF;                      /*!< RTS引脚复用功能选择 */
     } yDrvUsartConfig_t;
 
 /**
@@ -137,10 +161,10 @@ extern "C"
 #define YDRV_USART_CONFIG_DEFAULT()           \
     ((yDrvUsartConfig_t){                     \
         .usartId = YDRV_USART_MAX,            \
-        .txPin = YDRV_PIN_NULL,               \
-        .rxPin = YDRV_PIN_NULL,               \
-        .rtsPin = YDRV_PIN_NULL,              \
-        .ctsPin = YDRV_PIN_NULL,              \
+        .txPin = YDRV_PINNULL,                \
+        .rxPin = YDRV_PINNULL,                \
+        .rtsPin = YDRV_PINNULL,               \
+        .ctsPin = YDRV_PINNULL,               \
         .baudRate = 115200,                   \
         .dataBits = YDRV_USART_DATA_8BIT,     \
         .stopBits = YDRV_USART_STOP_1BIT,     \
@@ -386,37 +410,6 @@ extern "C"
 
     // ==================== USART专用模式函数 ====================
 
-    // /**
-    //  * @brief 设置智能卡保护时间
-    //  * @param handle USART句柄指针
-    //  * @param guardTime 保护时间（0-255）
-    //  * @note 仅在有效句柄时生效，无效句柄会被忽略
-    //  */
-    // void yDrvUsartSetSmartcardGuardTime(yDrvUsartHandle_t *handle, uint8_t guardTime);
-
-    // /**
-    //  * @brief 设置IrDA功率模式
-    //  * @param handle USART句柄指针
-    //  * @param powerMode 功率模式（true=低功率，false=正常功率）
-    //  * @note 仅在有效句柄时生效，无效句柄会被忽略
-    //  */
-    // void yDrvUsartSetIrdaPowerMode(yDrvUsartHandle_t *handle, bool powerMode);
-
-    // /**
-    //  * @brief 设置LIN断开检测长度
-    //  * @param handle USART句柄指针
-    //  * @param breakLength 断开检测长度（true=11位，false=10位）
-    //  * @note 仅在有效句柄时生效，无效句柄会被忽略
-    //  */
-    // void yDrvUsartSetLinBreakLength(yDrvUsartHandle_t *handle, bool breakLength);
-
-    // /**
-    //  * @brief 发送LIN断开信号
-    //  * @param handle USART句柄指针
-    //  * @note 仅在有效句柄时生效，无效句柄会被忽略
-    //  */
-    // void yDrvUsartSendLinBreak(yDrvUsartHandle_t *handle);
-
     // ==================== USART中断管理函数 ====================
     /**
      * @brief 使能指定中断
@@ -424,18 +417,10 @@ extern "C"
      * @param prio 优先级
      * @retval yDrv状态
      */
-    YLIB_INLINE yDrvStatus_t yDrvUsartEnableInterrupt(yDrvUsartHandle_t *handle)
+    YLIB_INLINE void yDrvUsartEnableInterrupt(yDrvUsartHandle_t *handle)
     {
-        // 参数有效性检查
-        if (handle == NULL)
-        {
-            return YDRV_INVALID_PARAM;
-        }
-
         // 设置中断优先级并使能中断
         NVIC_EnableIRQ(handle->IRQ);
-
-        return YDRV_OK;
     }
 
     /**
@@ -444,18 +429,10 @@ extern "C"
      * @param interrupts 中断类型位掩码
      * @retval yDrv状态
      */
-    YLIB_INLINE yDrvStatus_t yDrvUsartDisableInterrupt(yDrvUsartHandle_t *handle)
+    YLIB_INLINE void yDrvUsartDisableInterrupt(yDrvUsartHandle_t *handle)
     {
-        // 参数有效性检查
-        if (handle == NULL)
-        {
-            return YDRV_INVALID_PARAM;
-        }
-
         // 设置中断优先级并使能中断
         NVIC_DisableIRQ(handle->IRQ);
-
-        return YDRV_OK;
     }
 
     /**
@@ -466,7 +443,7 @@ extern "C"
      * @retval yDrv状态
      */
     yDrvStatus_t yDrvUsartRegisterCallback(yDrvUsartHandle_t *handle,
-                                           yDrvUsartExtiConfig_t exit);
+                                           yDrvUsartExtiConfig_t *exti);
 
     /**
      * @brief 反注册中断回调函数
@@ -500,6 +477,23 @@ extern "C"
     {
         LL_USART_ClearFlag_ORE(handle->instance);
     }
+
+    // ==================== USART DMA管理的函数 ====================
+    /**
+     * @brief 使能指定中断
+     * @param handle USART句柄指针
+     * @param prio 优先级
+     * @retval yDrv状态
+     */
+    yDrvStatus_t yDrvUsartDmaWrite(yDrvUsartHandle_t *handle, yDrvDmaChannel_t *channel);
+
+    /**
+     * @brief 使能指定中断
+     * @param handle USART句柄指针
+     * @param prio 优先级
+     * @retval yDrv状态
+     */
+    yDrvStatus_t yDrvUsartDmaRead(yDrvUsartHandle_t *handle, yDrvDmaChannel_t *channel);
 
 #ifdef __cplusplus
 }

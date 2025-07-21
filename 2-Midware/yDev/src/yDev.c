@@ -108,6 +108,7 @@ yDevStatus_t yDevInitStatic(void *config, void *handle)
         {
             dev_handle->index = idx;
             dev_handle->timeOutMs = 10;
+            dev_handle->errno = YDEV_ERRNO_NO_ERROR;
             if (dev_ops->init != NULL)
             {
                 return dev_ops->init(config, handle);
@@ -118,6 +119,7 @@ yDevStatus_t yDevInitStatic(void *config, void *handle)
             }
         }
     }
+    dev_handle->errno = YDEV_ERRNO_NOT_FOUND;
     return YDEV_ERROR; // 未找到匹配的设备类型
 }
 

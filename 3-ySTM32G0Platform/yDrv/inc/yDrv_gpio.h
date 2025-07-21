@@ -40,137 +40,147 @@ extern "C"
 
     /**
      * @brief GPIO工作模式枚举
+     * @note 定义GPIO的各种工作模式
      */
     typedef enum
     {
-        YDRV_GPIO_MODE_INPUT = 0, // 输入模式
-        YDRV_GPIO_MODE_OUTPUT_PP, // 输出模式
-        YDRV_GPIO_MODE_OUTPUT_OD, // 输出模式
-        YDRV_GPIO_MODE_ANALOG     // 模拟模式
+        YDRV_GPIO_MODE_INPUT = 0, /*!< 输入模式 */
+        YDRV_GPIO_MODE_OUTPUT_PP, /*!< 推挽输出模式 */
+        YDRV_GPIO_MODE_OUTPUT_OD, /*!< 开漏输出模式 */
+        YDRV_GPIO_MODE_ANALOG     /*!< 模拟模式 */
     } yDrvGpioMode_t;
 
     /**
      * @brief GPIO输出速度枚举
+     * @note 定义GPIO输出的速度等级
      */
     typedef enum
     {
-        YDRV_GPIO_SPEED_LEVEL0 = LL_GPIO_SPEED_FREQ_LOW,      // 低速 (2MHz)
-        YDRV_GPIO_SPEED_LEVEL1 = LL_GPIO_SPEED_FREQ_MEDIUM,   // 中速 (25MHz)
-        YDRV_GPIO_SPEED_LEVEL2 = LL_GPIO_SPEED_FREQ_HIGH,     // 高速 (50MHz)
-        YDRV_GPIO_SPEED_LEVEL3 = LL_GPIO_SPEED_FREQ_VERY_HIGH // 极高速 (100MHz)
+        YDRV_GPIO_SPEED_LEVEL0 = LL_GPIO_SPEED_FREQ_LOW,      /*!< 低速 (2MHz) */
+        YDRV_GPIO_SPEED_LEVEL1 = LL_GPIO_SPEED_FREQ_MEDIUM,   /*!< 中速 (25MHz) */
+        YDRV_GPIO_SPEED_LEVEL2 = LL_GPIO_SPEED_FREQ_HIGH,     /*!< 高速 (50MHz) */
+        YDRV_GPIO_SPEED_LEVEL3 = LL_GPIO_SPEED_FREQ_VERY_HIGH /*!< 极高速 (100MHz) */
     } yDrvGpioSpeed_t;
 
     /**
-     * @brief GPIO上下拉枚举
+     * @brief GPIO上下拉电阻枚举
+     * @note 定义GPIO引脚的上下拉电阻配置
      */
     typedef enum
     {
-        YDRV_GPIO_PUPD_NONE = LL_GPIO_PULL_NO,      // 无上下拉
-        YDRV_GPIO_PUPD_PULLUP = LL_GPIO_PULL_UP,    // 上拉
-        YDRV_GPIO_PUPD_PULLDOWN = LL_GPIO_PULL_DOWN // 下拉
+        YDRV_GPIO_PUPD_NONE = LL_GPIO_PULL_NO,      /*!< 无上下拉电阻 */
+        YDRV_GPIO_PUPD_PULLUP = LL_GPIO_PULL_UP,    /*!< 上拉电阻 */
+        YDRV_GPIO_PUPD_PULLDOWN = LL_GPIO_PULL_DOWN /*!< 下拉电阻 */
     } yDrvGpioPuPd_t;
 
     /**
-     * @brief GPIO引脚状态枚举
+     * @brief GPIO引脚电平状态枚举
+     * @note 定义GPIO引脚的电平状态
      */
     typedef enum
     {
-        YDRV_PIN_RESET = 0, // 引脚低电平
-        YDRV_PIN_SET = 1    // 引脚高电平
+        YDRV_PIN_RESET = 0, /*!< 引脚低电平状态 */
+        YDRV_PIN_SET = 1    /*!< 引脚高电平状态 */
     } yDrvPinState_t;
 
     /**
-     * @brief EXTI触发模式枚举
+     * @brief EXTI外部中断触发模式枚举
+     * @note 定义外部中断的触发条件
      */
     typedef enum
     {
-        YDRV_GPIO_EXTI_TRIGGER_RISING = 1,        // 上升沿触发
-        YDRV_GPIO_EXTI_TRIGGER_FALLING = 2,       // 下降沿触发
-        YDRV_GPIO_EXTI_TRIGGER_RISING_FALLING = 3 // 双沿触发
+        YDRV_GPIO_EXTI_TRIGGER_RISING = 1,        /*!< 上升沿触发 */
+        YDRV_GPIO_EXTI_TRIGGER_FALLING = 2,       /*!< 下降沿触发 */
+        YDRV_GPIO_EXTI_TRIGGER_RISING_FALLING = 3 /*!< 双沿触发 */
     } yDrvGpioExti_t;
 
     // ==================== GPIO配置结构体 ====================
 
     /**
      * @brief GPIO配置结构体
+     * @note 包含GPIO引脚初始化所需的全部配置参数
      */
     typedef struct
     {
-        yDrvGpioPin_t pin;     // GPIO引脚编号
-        yDrvGpioMode_t mode;   // 工作模式
-        yDrvGpioSpeed_t speed; // 输出速度
-        yDrvGpioPuPd_t pupd;   // 上下拉配置
+        yDrvGpioPin_t pin;     /*!< GPIO引脚编号 */
+        yDrvGpioMode_t mode;   /*!< GPIO工作模式 */
+        yDrvGpioSpeed_t speed; /*!< GPIO输出速度 */
+        yDrvGpioPuPd_t pupd;   /*!< GPIO上下拉配置 */
     } yDrvGpioConfig_t;
 
 /**
  * @brief GPIO配置结构体默认初始化宏
  * @note 提供最常用的默认配置，适用于输入模式
  */
-#define YDRV_GPIO_CONFIG_DEFAULT()                 \
-    ((yDrvGpioConfig_t)                            \
-    {                                              \
-        .pin = YDRV_PIN_NULL,                      \
-        .mode = YDRV_GPIO_MODE_INPUT,              \
-        .speed = YDRV_GPIO_SPEED_LEVEL0,           \
-        .pupd = YDRV_GPIO_PUPD_NONE,               \
+#define YDRV_GPIO_CONFIG_DEFAULT()       \
+    ((yDrvGpioConfig_t){                 \
+        .pin = YDRV_PINNULL,             \
+        .mode = YDRV_GPIO_MODE_INPUT,    \
+        .speed = YDRV_GPIO_SPEED_LEVEL0, \
+        .pupd = YDRV_GPIO_PUPD_NONE,     \
     })
 
     /**
      * @brief GPIO句柄结构体
+     * @note 包含GPIO操作所需的硬件信息和中断配置
      */
     typedef struct
     {
-        yDrvGpioInfo_t gpioInfo;
-        IRQn_Type IRQ;
+        yDrvGpioInfo_t gpioInfo; /*!< GPIO硬件信息 */
+        IRQn_Type IRQ;           /*!< 关联的中断号 */
     } yDrvGpioHandle_t;
+
 /**
  * @brief GPIO句柄结构体默认初始化宏
  * @note 提供安全的默认初始化值
  */
-#define YDRV_GPIO_HANDLE_DEFAULT()                 \
-    ((yDrvGpioHandle_t)                            \
-    {                                              \
-        .gpioInfo = {NULL, 0, 0, 0},               \
-        .IRQ = (IRQn_Type)0,                       \
+#define YDRV_GPIO_HANDLE_DEFAULT()   \
+    ((yDrvGpioHandle_t){             \
+        .gpioInfo = {NULL, 0, 0, 0}, \
+        .IRQ = (IRQn_Type)0,         \
     })
+
     /**
-     * @brief EXIT配置句柄结构体
+     * @brief EXTI外部中断配置结构体
+     * @note 包含外部中断配置的全部参数
      */
     typedef struct
     {
-        yDrvGpioExti_t trigger;
-        uint32_t prio;
-        void (*function)(void *para); // 回调函数指针
-        void *arg;                    // 回调函数参数
-        uint32_t enable;
+        yDrvGpioExti_t trigger;       /*!< 中断触发模式 */
+        uint32_t prio;                /*!< 中断优先级 */
+        void (*function)(void *para); /*!< 中断回调函数指针 */
+        void *arg;                    /*!< 回调函数参数 */
+        uint32_t enable;              /*!< 中断使能标志 */
     } yDrvGpioExtiConfig_t;
+
 /**
  * @brief GPIO中断配置结构体默认初始化宏
  * @note 提供安全的默认中断配置
  */
-#define YDRV_GPIO_EXTI_CONFIG_DEFAULT()            \
-    ((yDrvGpioExtiConfig_t)                        \
-    {                                              \
-        .trigger = YDRV_GPIO_EXTI_TRIGGER_RISING,  \
-        .prio = 0,                                 \
-        .function = NULL,                          \
-        .arg = NULL,                               \
-        .enable = 0,                               \
+#define YDRV_GPIO_EXTI_CONFIG_DEFAULT()           \
+    ((yDrvGpioExtiConfig_t){                      \
+        .trigger = YDRV_GPIO_EXTI_TRIGGER_RISING, \
+        .prio = 0,                                \
+        .function = NULL,                         \
+        .arg = NULL,                              \
+        .enable = 0,                              \
     })
     // ==================== GPIO基础函数 ====================
 
     /**
      * @brief 初始化GPIO引脚
-     * @param config 配置文件
-     * @param handle 工作模式
+     * @param config GPIO配置结构体指针
+     * @param handle GPIO句柄结构体指针
      * @retval yDrv状态
+     * @note 根据配置参数初始化指定的GPIO引脚
      */
     yDrvStatus_t yDrvGpioInitStatic(yDrvGpioConfig_t *config, yDrvGpioHandle_t *handle);
 
     /**
      * @brief 反初始化GPIO引脚
-     * @param pin GPIO引脚编号
+     * @param handle GPIO句柄结构体指针
      * @retval yDrv状态
+     * @note 将GPIO引脚恢复为复位状态
      */
     yDrvStatus_t yDrvGpioDeInitStatic(yDrvGpioHandle_t *handle);
 
@@ -178,6 +188,7 @@ extern "C"
      * @brief 初始化GPIO配置结构体为默认值
      * @param config 配置结构体指针
      * @retval 无
+     * @note 将配置结构体设置为安全的默认值
      */
     void yDrvGpioConfigStructInit(yDrvGpioConfig_t *config);
 
@@ -185,6 +196,7 @@ extern "C"
      * @brief 初始化GPIO句柄结构体为默认值
      * @param handle 句柄结构体指针
      * @retval 无
+     * @note 将句柄结构体设置为安全的默认值
      */
     void yDrvGpioHandleStructInit(yDrvGpioHandle_t *handle);
 
@@ -192,6 +204,7 @@ extern "C"
      * @brief 初始化GPIO中断配置结构体为默认值
      * @param extiConfig 中断配置结构体指针
      * @retval 无
+     * @note 将中断配置结构体设置为安全的默认值
      */
     void yDrvGpioExtiConfigStructInit(yDrvGpioExtiConfig_t *extiConfig);
 
@@ -229,11 +242,6 @@ extern "C"
      */
     YLIB_INLINE yDrvPinState_t yDrvGpioRead(yDrvGpioHandle_t *handle)
     {
-        if (handle == NULL)
-        {
-            return YDRV_PIN_RESET;
-        }
-
         return (yDrvPinState_t)LL_GPIO_IsInputPinSet(handle->gpioInfo.port, handle->gpioInfo.pinMask);
     }
 
@@ -244,11 +252,6 @@ extern "C"
      */
     YLIB_INLINE yDrvStatus_t yDrvGpioToggle(yDrvGpioHandle_t *handle)
     {
-        if (handle == NULL)
-        {
-            return YDRV_INVALID_PARAM;
-        }
-
         LL_GPIO_TogglePin(handle->gpioInfo.port, handle->gpioInfo.pinMask);
         return YDRV_OK;
     }
@@ -285,12 +288,6 @@ extern "C"
 
     YLIB_INLINE yDrvStatus_t yDrvGpioEnableInterrupt(yDrvGpioHandle_t *handle)
     {
-        // 参数有效性检查
-        if (handle == NULL)
-        {
-            return YDRV_INVALID_PARAM;
-        }
-
         NVIC_EnableIRQ(handle->IRQ);
 
         return YDRV_OK;
@@ -303,14 +300,7 @@ extern "C"
      */
     YLIB_INLINE yDrvStatus_t yDrvGpioDisableInterrupt(yDrvGpioHandle_t *handle)
     {
-        // 参数有效性检查
-        if (handle == NULL)
-        {
-            return YDRV_INVALID_PARAM;
-        }
-
         NVIC_DisableIRQ(handle->IRQ);
-
         return YDRV_OK;
     }
 

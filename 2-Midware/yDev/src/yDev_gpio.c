@@ -52,6 +52,7 @@ static yDevStatus_t yDev_Gpio_Init(void *config, void *handle)
     // 调用底层yDrv初始化GPIO
     if (yDrvGpioInitStatic(&gpio_config->drv_config, &gpio_handle->drv_handle) != YDRV_OK)
     {
+        gpio_handle->base.errno = YDEV_ERRNO_NOT_INIT;
         return YDEV_ERROR;
     }
 
@@ -81,6 +82,7 @@ static yDevStatus_t yDev_Gpio_Deinit(void *handle)
     // 调用底层yDrv反初始化GPIO
     if (yDrvGpioDeInitStatic(&gpio_handle->drv_handle) != YDRV_OK)
     {
+        gpio_handle->base.errno = YDEV_ERRNO_NOT_DEINIT;
         return YDEV_ERROR;
     }
 

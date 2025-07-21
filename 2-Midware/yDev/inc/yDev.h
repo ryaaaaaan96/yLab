@@ -63,7 +63,8 @@ extern "C"
         YDEV_TYPE_USART,     // 串口设备
         YDEV_TYPE_SPI,       // SPI设备
         YDEV_TYPE_IIC,       // IIC设备
-        YDEV_TYPE_MAX        // 定时器设备
+        YDEV_TYPE_DMA,       // DMA设备
+        YDEV_TYPE_MAX        // 最大值
     } yDevType_t;
 
     /**
@@ -246,6 +247,11 @@ extern "C"
     yDevStatus_t yLabInit(void);
 
     size_t yDevGetTimeMS(void);
+
+#define YDEV_ERRNO_NO_ERROR (0)            // 设备未初始化错误
+#define YDEV_ERRNO_NOT_FOUND (1UL << 0UL)  // 设备未找到错误
+#define YDEV_ERRNO_NOT_INIT (1UL << 1UL)   // 设备未初始化错误
+#define YDEV_ERRNO_NOT_DEINIT (1UL << 2UL) // 设备未反初始化错误
 
 #ifdef __cplusplus
 }

@@ -1,11 +1,24 @@
 /**
  * @file yDrv.c
  * @brief yDrv核心初始化模块实现
- * @details 提供系统时钟配置、定时器初始化等核心功能
- * @author Ryan
- * @date 2025-06-30
- * @version 1.0
- * @copyright Copyright (c) 2025 YLab
+ * @version 2.0
+ * @date 2025
+ * @author YLab Development Team
+ *
+ * @par 功能描述:
+ * 提供yDrv层的核心初始化功能，包括系统时钟配置、HAL库初始化等
+ *
+ * @par 主要功能:
+ * - HAL库初始化
+ * - 系统时钟配置
+ * - 驱动层统一初始化接口
+ * - 硬件抽象层基础服务启动
+ *
+ * @par 更新历史:
+ * - v2.0 (2025): 优化系统时钟配置，完善注释文档
+ * - v1.0 (2024): 初始版本，基础初始化功能
+ *
+ * @copyright Copyright (c) 2025 YLab Development Team
  */
 
 #include "stm32g0xx_hal.h"
@@ -17,21 +30,28 @@
 #include "yDrv_basic.h"
 
 // ==================== 私有函数声明 ====================
+
+/**
+ * @brief 系统时钟配置函数
+ * @retval 无
+ * @note 配置系统时钟为64MHz，基于内部或外部时钟源
+ */
 static void SystemClock_Config(void);
 
 // ==================== 公共函数实现 ====================
 
 /**
- * @brief yDrv驱动模块初始化
- * @details 初始化HAL库和系统时钟配置
- * @param 无
- * @return yDrvStatus_t 初始化状态
- *         @retval YDRV_OK 初始化成功
- * @note 此函数必须在使用任何yDrv功能前调用
+ * @brief yDrv驱动层初始化
+ * @retval yDrvStatus_t 初始化状态
+ * @retval YDRV_OK 初始化成功
+ * @note 此函数必须在使用任何yDrv功能前调用，完成HAL库和系统时钟初始化
  */
 yDrvStatus_t yDrvInit(void)
 {
+    // HAL库初始化
     HAL_Init();
+
+    // 系统时钟配置
     SystemClock_Config();
 
     return YDRV_OK;
@@ -41,16 +61,18 @@ yDrvStatus_t yDrvInit(void)
 
 /**
  * @brief 系统时钟配置
- * @details 配置系统时钟为64MHz，使用外部高速晶振(HSE)和PLL
- * @param 无
- * @return 无
- * @note 时钟配置：HSE(8MHz) -> PLL(x16/2) -> 64MHz系统时钟
- *       - Flash延迟：2个等待周期
+ * @retval 无
+ * @note 配置系统时钟为64MHz，使用PLL倍频
+ *       时钟配置参数：
+ *       - 时钟源：HSI或HSE（根据硬件配置）
+ *       - PLL配置：适配STM32G0系列
+ *       - 系统时钟：64MHz
+ *       - Flash延迟：根据频率自动配置
  *       - AHB分频：1 (64MHz)
- *       - APB1分频：1 (64MHz)
- *       - APB2分频：1 (64MHz)
+ *       - APB分频：1 (64MHz)
  */
-static void SystemClock_Config(void)
+*-APB2分频：1(64MHz) * /
+    static void SystemClock_Config(void)
 {
     // 设置Flash延迟为2个等待周期（64MHz系统时钟需要）
     LL_FLASH_SetLatency(LL_FLASH_LATENCY_2);

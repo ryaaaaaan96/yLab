@@ -28,6 +28,7 @@ extern "C"
 // ==================== 包含文件 ====================
 #include "yDev.h"
 #include "yDrv_usart.h"
+#include "yDrv_dma.h"
     // ==================== USART设备特定定义 ====================
 
     /**
@@ -50,8 +51,10 @@ extern "C"
      */
     typedef struct
     {
-        yDevHandle_t base;            /**< yDev基础句柄 */
-        yDrvUsartHandle_t drv_handle; /**< USART驱动句柄 */
+        yDevHandle_t base;             /**< yDev基础句柄 */
+        yDrvUsartHandle_t drv_handle;  /**< USART驱动句柄 */
+        yDrvDmaHandle_t rx_dma_handle; /**< 接收缓冲区指针 */
+        yDrvDmaHandle_t tx_dma_handle; /**< 发送缓冲区指针 */
     } yDevHandle_Usart_t;
 
 // ==================== yDev USART配置初始化宏 ====================
@@ -70,11 +73,12 @@ extern "C"
  * @brief yDev USART句柄结构体默认初始化宏
  * @note 提供安全的默认初始化值
  */
-#define YDEV_USART_HANDLE_DEFAULT()                \
-    ((yDevHandle_Usart_t){                         \
-        .base = YDEV_HANDLE_DEFAULT(),             \
-        .drv_handle = YDRV_USART_HANDLE_DEFAULT(), \
-    })
+#define YDEV_USART_HANDLE_DEFAULT()                 \
+    ((yDevHandle_Usart_t){                          \
+        .base = YDEV_HANDLE_DEFAULT(),              \
+        .drv_handle = YDRV_USART_HANDLE_DEFAULT(),  \
+        .rx_dma_handle = YDRV_DMA_HANDLE_DEFAULT(), \
+        .tx_dma_handle = YDRV_DMA_HANDLE_DEFAULT()})
 
     // ==================== yDev USART初始化函数 ====================
 
@@ -92,6 +96,13 @@ extern "C"
      */
     void yDevUsartHandleStructInit(yDevHandle_Usart_t *handle);
 
+    // ==================== yDev USART中断DMA调用串口函数 ====================
+
+    YLIB_INLINE uint32_t yDevUsartDmaRxLenGet(yDevHandle_Usart_t *handle)
+    {
+        return yDrvDmaCurLenGet(&handle->rx_dma_handle);
+    }
+
 // ==================== USART设备IOCTL命令定义 ====================
 
 /**
@@ -99,18 +110,17 @@ extern "C"
  */
 #define YDEV_USART_IOCTL_BASE (YDEV_IOCTL_BASE + 0x100)
 
-#define YDEV_USART_IOCTL_SET_BAUDRATE (YDEV_USART_IOCTL_BASE + 1)     /**< 设置波特率 */
-#define YDEV_USART_IOCTL_GET_BAUDRATE (YDEV_USART_IOCTL_BASE + 2)     /**< 获取波特率 */
-#define YDEV_USART_IOCTL_FLUSH_RX (YDEV_USART_IOCTL_BASE + 3)         /**< 清空接收缓冲区 */
-#define YDEV_USART_IOCTL_FLUSH_TX (YDEV_USART_IOCTL_BASE + 4)         /**< 清空发送缓冲区 */
-#define YDEV_USART_IOCTL_GET_RX_COUNT (YDEV_USART_IOCTL_BASE + 5)     /**< 获取接收缓冲区数据量 */
-#define YDEV_USART_IOCTL_GET_TX_COUNT (YDEV_USART_IOCTL_BASE + 6)     /**< 获取发送缓冲区数据量 */
-#define YDEV_USART_IOCTL_SET_RX_CALLBACK (YDEV_USART_IOCTL_BASE + 7)  /**< 设置接收回调函数 */
-#define YDEV_USART_IOCTL_SET_TX_CALLBACK (YDEV_USART_IOCTL_BASE + 8)  /**< 设置发送完成回调函数 */
-#define YDEV_USART_IOCTL_SET_ERR_CALLBACK (YDEV_USART_IOCTL_BASE + 9) /**< 设置错误回调函数 */
-#define YDEV_USART_IOCTL_ENABLE_IRQ (YDEV_USART_IOCTL_BASE + 10)      /**< 使能中断 */
-#define YDEV_USART_IOCTL_DISABLE_IRQ (YDEV_USART_IOCTL_BASE + 11)     /**< 禁用中断 */
-#define YDEV_USART_IOCTL_GET_STATUS (YDEV_USART_IOCTL_BASE + 12)      /**< 获取状态 */
+#define YDEV_USART_IOCTL_SET_INTERRUPT (YDEV_USART_IOCTL_BASE + 1)     /**< 设置中断 */
+#define YDEV_USART_IOCTL_RESET_INTERRUPT (YDEV_USART_IOCTL_BASE + 2)   /**< 重置中断 */
+#define YDEV_USART_IOCTL_ENABLE_INTERRUPT (YDEV_USART_IOCTL_BASE + 3)  /**< 打开中断状态 */
+#define YDEV_USART_IOCTL_DISABLE_INTERRUPT (YDEV_USART_IOCTL_BASE + 4) /**< 关闭中断状态 */
+
+#define YDEV_USART_IOCTL_SET_SEND_DMA (YDEV_USART_IOCTL_BASE + 14)        /**< 设置发送DMA */
+#define YDEV_USART_IOCTL_SET_RECEIVE_DMA (YDEV_USART_IOCTL_BASE + 15)     /**< 设置接收DMA */
+#define YDEV_USART_IOCTL_ENABLE_SEND_DMA (YDEV_USART_IOCTL_BASE + 16)     /**< 使能发送DMA */
+#define YDEV_USART_IOCTL_ENABLE_RECEIVE_DMA (YDEV_USART_IOCTL_BASE + 17)  /**< 使能接收DMA */
+#define YDEV_USART_IOCTL_DISABLE_SEND_DMA (YDEV_USART_IOCTL_BASE + 18)    /**< 禁用发送DMA */
+#define YDEV_USART_IOCTL_DISABLE_RECEIVE_DMA (YDEV_USART_IOCTL_BASE + 19) /**< 禁用接收DMA */
 
     // ==================== USART错误代码定义 ====================
 

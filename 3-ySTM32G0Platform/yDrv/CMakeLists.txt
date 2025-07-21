@@ -1,26 +1,34 @@
 # ==============================================================================
-# yDrv的编译的文件
+# yDrv驱动层CMake构建配置文件
 # ==============================================================================
-# 暂无说明
+# 描述: STM32G0系列yDrv驱动层的CMake构建配置
+# 作者: YLab Development Team  
+# 版本: 2.0
+# 日期: 2025
 # ==============================================================================
 
 cmake_minimum_required(VERSION 3.22)
 
 # ------------------------------------------------------------------------------
-# STM32的HAL库的 头文件包含路径
+# yDrv驱动层头文件包含路径配置
 # ------------------------------------------------------------------------------
 
-# 包含了项目所需的所有头文件目录
+# yDrv驱动层头文件目录
 set(yDrv_Include_Dirs
-    ${CMAKE_CURRENT_SOURCE_DIR}/inc                     # 
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc    # yDrv驱动层公共头文件目录
 )
 
-# 包含了项目所需的源文件目录
+# ------------------------------------------------------------------------------
+# yDrv驱动层源文件配置
+# ------------------------------------------------------------------------------
+
+# yDrv驱动层源文件列表
 set(yDrv_Src
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/yDrv_basic.c        
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/yDrv_gpio.c        
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/yDrv.c        
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/yDrv_usart.c        
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/yDrv_basic.c        # 基础功能实现
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/yDrv_gpio.c         # GPIO驱动实现
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/yDrv.c              # 核心初始化实现
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/yDrv_usart.c        # USART驱动实现
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/yDrv_dma.c          # DMA驱动实现
 )
 
 # ------------------------------------------------------------------------------

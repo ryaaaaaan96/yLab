@@ -52,6 +52,18 @@ extern "C"
      */
     uint32_t MessageRead(void *msg, uint32_t len);
 
+    /**
+     * @brief 开关状态读取函数
+     * @param type 开关类型
+     * @return int 开关状态 (0=关闭, 非0=开启)
+     *
+     * @par 功能描述:
+     * 处理接收到的消息循环，更新缓冲区头部索引
+     */
+    int MessageLoop(void);
+
+    void MessageLoopReset(void);
+
 #ifdef __cplusplus
 }
 #endif
