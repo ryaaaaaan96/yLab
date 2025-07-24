@@ -14,7 +14,7 @@
 #include "task.h"
 #include "blink.h"
 #include "yDev.h"
-
+#include "serialshell.h"
 // ==================== 私有函数声明 ====================
 
 /**
@@ -31,7 +31,7 @@ static void Startup(void *pvParameters)
 
     // 初始化LED闪烁任务
     BlinkTaskInit();
-
+    ShellTaskInit();
     // 初始化完成后删除启动任务
     vTaskDelete(NULL);
 }

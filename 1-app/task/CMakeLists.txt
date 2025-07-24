@@ -13,6 +13,8 @@ cmake_minimum_required(VERSION 3.22)
 # 应用程序源文件列表
 set(APP_TASK_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/blink.c     # 主程序文件
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/serialshell.c     # 主程序文件
+
 )
 
 # ------------------------------------------------------------------------------

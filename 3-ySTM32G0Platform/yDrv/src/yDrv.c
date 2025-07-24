@@ -70,9 +70,10 @@ yDrvStatus_t yDrvInit(void)
  *       - Flash延迟：根据频率自动配置
  *       - AHB分频：1 (64MHz)
  *       - APB分频：1 (64MHz)
+ *       -APB2分频：1(64MHz) * /
  */
-*-APB2分频：1(64MHz) * /
-    static void SystemClock_Config(void)
+
+static void SystemClock_Config(void)
 {
     // 设置Flash延迟为2个等待周期（64MHz系统时钟需要）
     LL_FLASH_SetLatency(LL_FLASH_LATENCY_2);

@@ -32,47 +32,43 @@ extern "C"
     // ==================== USART设备特定定义 ====================
 
     /**
-     * @brief USART设备配置结构体
-     *
-     * @par 功能描述:
-     * 包含yDev基础配置和USART特定的驱动配置参数
+     * @brief yDev USART设备配置结构体
+     * @note 包含yDev基础配置和USART特定的驱动配置参数
      */
     typedef struct
     {
-        yDevConfig_t base;            /**< yDev基础配置 */
-        yDrvUsartConfig_t drv_config; /**< USART驱动配置 */
+        yDevConfig_t base;            /*!< yDev基础配置结构体 */
+        yDrvUsartConfig_t drv_config; /*!< USART底层驱动配置结构体 */
     } yDevConfig_Usart_t;
 
     /**
-     * @brief USART设备句柄结构体
-     *
-     * @par 功能描述:
-     * 包含yDev基础句柄和USART特定的驱动句柄及缓冲区管理
+     * @brief yDev USART设备句柄结构体
+     * @note 包含yDev基础句柄和USART特定的驱动句柄及缓冲区管理信息
      */
     typedef struct
     {
-        yDevHandle_t base;             /**< yDev基础句柄 */
-        yDrvUsartHandle_t drv_handle;  /**< USART驱动句柄 */
-        yDrvDmaHandle_t rx_dma_handle; /**< 接收缓冲区指针 */
-        yDrvDmaHandle_t tx_dma_handle; /**< 发送缓冲区指针 */
+        yDevHandle_t base;             /*!< yDev基础句柄结构体 */
+        yDrvUsartHandle_t drv_handle;  /*!< USART底层驱动句柄 */
+        yDrvDmaHandle_t rx_dma_handle; /*!< 接收DMA句柄 */
+        yDrvDmaHandle_t tx_dma_handle; /*!< 发送DMA句柄 */
     } yDevHandle_Usart_t;
 
-// ==================== yDev USART配置初始化宏 ====================
+    // ==================== yDev USART配置初始化宏 ====================
 
-/**
- * @brief yDev USART配置结构体默认初始化宏
- * @note 提供最常用的默认配置，适用于标准UART通信
- */
+    /**
+     * @brief yDev USART配置结构体默认初始化宏
+     * @note 提供最常用的默认配置，适用于标准UART通信
+     */
 #define YDEV_USART_CONFIG_DEFAULT()                \
     ((yDevConfig_Usart_t){                         \
         .base = YDEV_CONFIG_DEFAULT(),             \
         .drv_config = YDRV_USART_CONFIG_DEFAULT(), \
     })
 
-/**
- * @brief yDev USART句柄结构体默认初始化宏
- * @note 提供安全的默认初始化值
- */
+    /**
+     * @brief yDev USART句柄结构体默认初始化宏
+     * @note 提供安全的默认初始化值
+     */
 #define YDEV_USART_HANDLE_DEFAULT()                 \
     ((yDevHandle_Usart_t){                          \
         .base = YDEV_HANDLE_DEFAULT(),              \
@@ -84,20 +80,28 @@ extern "C"
 
     /**
      * @brief 初始化yDev USART配置结构体为默认值
-     * @param config 配置结构体指针
+     * @param config USART配置结构体指针
      * @retval 无
+     * @note 将配置结构体设置为安全的默认值
      */
     void yDevUsartConfigStructInit(yDevConfig_Usart_t *config);
 
     /**
      * @brief 初始化yDev USART句柄结构体为默认值
-     * @param handle 句柄结构体指针
+     * @param handle USART句柄结构体指针
      * @retval 无
+     * @note 将句柄结构体设置为安全的默认值
      */
     void yDevUsartHandleStructInit(yDevHandle_Usart_t *handle);
 
-    // ==================== yDev USART中断DMA调用串口函数 ====================
+    // ==================== yDev USART扩展功能函数 ====================
 
+    /**
+     * @brief 获取USART接收DMA当前剩余长度
+     * @param handle USART设备句柄指针
+     * @retval uint32_t DMA传输剩余长度
+     * @note 内联函数，用于高效获取DMA接收状态
+     */
     YLIB_INLINE uint32_t yDevUsartDmaRxLenGet(yDevHandle_Usart_t *handle)
     {
         return yDrvDmaCurLenGet(&handle->rx_dma_handle);
