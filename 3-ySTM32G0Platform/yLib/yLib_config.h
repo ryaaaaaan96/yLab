@@ -90,8 +90,8 @@ extern "C"
 /**
  * @brief 堆总大小配置
  */
-#ifndef configTOTAL_HEAP_SIZE
-#define configTOTAL_HEAP_SIZE (32 * 1024) /* 默认堆大小32KB */
+#ifndef YLIB_TOTAL_HEAP_SIZE
+#define YLIB_TOTAL_HEAP_SIZE (32 * 1024) /* 默认堆大小32KB */
 #endif
 
 /**

@@ -29,6 +29,8 @@ set(yDrv_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/src/yDrv.c              # 核心初始化实现
     ${CMAKE_CURRENT_SOURCE_DIR}/src/yDrv_usart.c        # USART驱动实现
     ${CMAKE_CURRENT_SOURCE_DIR}/src/yDrv_dma.c          # DMA驱动实现
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/yDrv_spi.c          # SPI驱动实现
+
 )
 
 # ------------------------------------------------------------------------------

@@ -157,16 +157,14 @@ yDrvStatus_t yDrvUsartInitStatic(const yDrvUsartConfig_t *config, yDrvUsartHandl
         break;
     }
 
-    // 6. 使能USART外设
-    LL_USART_Enable(handle->instance);
-
     // 7. 初始化句柄结构
 
     handle->flagBtyeSend = ((config->parity == YDRV_USART_PARITY_NONE) &&
                             (config->dataBits == YDRV_USART_DATA_9BIT))
                                ? 1
                                : 0;
-
+    // 6. 使能USART外设
+    LL_USART_Enable(handle->instance);
     return YDRV_OK;
 }
 
@@ -481,7 +479,89 @@ yDrvStatus_t yDrvUsartUnregisterCallback(yDrvUsartHandle_t *handle, yDrvUsartExt
 
     return YDRV_OK;
 }
+yDrvStatus_t yDrvUsartDmaWrite(yDrvUsartHandle_t *handle, yDrvDmaChannel_t *channel)
+{
+    yDrvDmaInfo_t dma_info;
 
+    // 参数有效性检查
+    if (handle == NULL || channel == NULL)
+    {
+        return YDRV_INVALID_PARAM;
+    }
+
+    yDrvParseDma(*channel, &dma_info);
+    LL_DMA_SetPeriphAddress(dma_info.dma,
+                            dma_info.channel,
+                            LL_USART_DMA_GetRegAddr(handle->instance, LL_USART_DMA_REG_DATA_TRANSMIT));
+    LL_DMA_SetPeriphSize(dma_info.dma,
+                         dma_info.channel,
+                         LL_DMA_PDATAALIGN_BYTE);
+    LL_DMA_SetPeriphIncMode(dma_info.dma,
+                            dma_info.channel, LL_DMA_PERIPH_NOINCREMENT); // 配置优先级
+    switch (handle->usartId)
+    {
+    case YDRV_USART_1:
+        LL_DMA_SetPeriphRequest(dma_info.dma,
+                                dma_info.channel,
+                                LL_DMAMUX_REQ_USART1_TX); // 配置DMAMUX请求信号
+        return YDRV_OK;
+    case YDRV_USART_2:
+        LL_DMA_SetPeriphRequest(dma_info.dma,
+                                dma_info.channel,
+                                LL_DMAMUX_REQ_USART2_TX); // 配置DMAMUX请求信号
+        return YDRV_OK;
+    case YDRV_USART_3:
+        LL_DMA_SetPeriphRequest(dma_info.dma,
+                                dma_info.channel,
+                                LL_DMAMUX_REQ_USART3_TX); // 配置DMAMUX请求信号
+        return YDRV_OK;
+    default:
+        return YDRV_ERROR;
+    }
+    return YDRV_INVALID_PARAM;
+}
+
+yDrvStatus_t yDrvUsartDmaRead(yDrvUsartHandle_t *handle, yDrvDmaChannel_t *channel)
+{
+    yDrvDmaInfo_t dma_info;
+
+    if (yDrvParseDma(*channel, &dma_info) != YDRV_OK)
+    {
+        return YDRV_INVALID_PARAM;
+    }
+    LL_DMA_SetPeriphAddress(dma_info.dma,
+                            dma_info.channel,
+                            LL_USART_DMA_GetRegAddr(handle->instance, LL_USART_DMA_REG_DATA_RECEIVE));
+    LL_DMA_SetPeriphSize(dma_info.dma,
+                         dma_info.channel,
+                         LL_DMA_PDATAALIGN_BYTE);
+    LL_DMA_SetPeriphIncMode(dma_info.dma,
+                            dma_info.channel,
+                            LL_DMA_PERIPH_NOINCREMENT); // 配置优先级
+    // 启用USART的DMA接收
+    LL_USART_EnableDMAReq_RX(handle->instance);
+    switch (handle->usartId)
+    {
+    case YDRV_USART_1:
+        LL_DMA_SetPeriphRequest(dma_info.dma,
+                                dma_info.channel,
+                                LL_DMAMUX_REQ_USART1_RX); // 配置DMAMUX请求信号
+        return YDRV_OK;
+    case YDRV_USART_2:
+        LL_DMA_SetPeriphRequest(dma_info.dma,
+                                dma_info.channel,
+                                LL_DMAMUX_REQ_USART2_RX); // 配置DMAMUX请求信号
+        return YDRV_OK;
+    case YDRV_USART_3:
+        LL_DMA_SetPeriphRequest(dma_info.dma,
+                                dma_info.channel,
+                                LL_DMAMUX_REQ_USART3_RX); // 配置DMAMUX请求信号
+        return YDRV_OK;
+    default:
+        return YDRV_ERROR;
+    }
+    return YDRV_OK;
+}
 // // ==================== 私有函数实现 ====================
 
 /**
@@ -708,90 +788,6 @@ static void prv_DeInitGpio(yDrvUsartHandle_t *handle)
         LL_GPIO_Init(handle->ctsPinInfo.port, &gpio_init);
         handle->ctsPinInfo.flag = 0;
     }
-}
-
-yDrvStatus_t yDrvUsartDmaWrite(yDrvUsartHandle_t *handle, yDrvDmaChannel_t *channel)
-{
-    yDrvDmaInfo_t dma_info;
-
-    // 参数有效性检查
-    if (handle == NULL || channel == NULL)
-    {
-        return YDRV_INVALID_PARAM;
-    }
-
-    yDrvParseDma(*channel, &dma_info);
-    LL_DMA_SetPeriphAddress(DMA1,
-                            LL_DMA_CHANNEL_5,
-                            LL_USART_DMA_GetRegAddr(handle->instance, LL_USART_DMA_REG_DATA_TRANSMIT));
-    LL_DMA_SetPeriphSize(dma_info.dma,
-                         dma_info.channel,
-                         LL_DMA_PDATAALIGN_BYTE);
-    LL_DMA_SetPeriphIncMode(dma_info.dma,
-                            dma_info.channel, LL_DMA_PERIPH_NOINCREMENT); // 配置优先级
-    switch (handle->usartId)
-    {
-    case YDRV_USART_1:
-        LL_DMA_SetPeriphRequest(dma_info.dma,
-                                dma_info.channel,
-                                LL_DMAMUX_REQ_USART1_TX); // 配置DMAMUX请求信号
-        return YDRV_OK;
-    case YDRV_USART_2:
-        LL_DMA_SetPeriphRequest(dma_info.dma,
-                                dma_info.channel,
-                                LL_DMAMUX_REQ_USART2_TX); // 配置DMAMUX请求信号
-        return YDRV_OK;
-    case YDRV_USART_3:
-        LL_DMA_SetPeriphRequest(dma_info.dma,
-                                dma_info.channel,
-                                LL_DMAMUX_REQ_USART3_TX); // 配置DMAMUX请求信号
-        return YDRV_OK;
-    default:
-        return YDRV_ERROR;
-    }
-    return YDRV_INVALID_PARAM;
-}
-
-yDrvStatus_t yDrvUsartDmaRead(yDrvUsartHandle_t *handle, yDrvDmaChannel_t *channel)
-{
-    yDrvDmaInfo_t dma_info;
-
-    if (yDrvParseDma(*channel, &dma_info) != YDRV_OK)
-    {
-        return YDRV_INVALID_PARAM;
-    }
-    LL_DMA_SetPeriphAddress(dma_info.dma,
-                            dma_info.channel,
-                            LL_USART_DMA_GetRegAddr(handle->instance, LL_USART_DMA_REG_DATA_RECEIVE));
-    LL_DMA_SetPeriphSize(dma_info.dma,
-                         dma_info.channel,
-                         LL_DMA_PDATAALIGN_BYTE);
-    LL_DMA_SetPeriphIncMode(dma_info.dma,
-                            dma_info.channel,
-                            LL_DMA_PERIPH_NOINCREMENT); // 配置优先级
-    // 启用USART的DMA接收
-    LL_USART_EnableDMAReq_RX(handle->instance);
-    switch (handle->usartId)
-    {
-    case YDRV_USART_1:
-        LL_DMA_SetPeriphRequest(dma_info.dma,
-                                dma_info.channel,
-                                LL_DMAMUX_REQ_USART1_RX); // 配置DMAMUX请求信号
-        return YDRV_OK;
-    case YDRV_USART_2:
-        LL_DMA_SetPeriphRequest(dma_info.dma,
-                                dma_info.channel,
-                                LL_DMAMUX_REQ_USART2_RX); // 配置DMAMUX请求信号
-        return YDRV_OK;
-    case YDRV_USART_3:
-        LL_DMA_SetPeriphRequest(dma_info.dma,
-                                dma_info.channel,
-                                LL_DMAMUX_REQ_USART3_RX); // 配置DMAMUX请求信号
-        return YDRV_OK;
-    default:
-        return YDRV_ERROR;
-    }
-    return YDRV_OK;
 }
 
 // // ==================== 中断处理函数（优化版本） ====================

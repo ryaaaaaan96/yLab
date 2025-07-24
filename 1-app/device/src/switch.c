@@ -9,7 +9,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "switch.h"
-
+#include "shell.h"
 // ==================== 静态变量 ====================
 
 static yDevConfig_Gpio_t switch_config[SWITCH_TYPE_MAX] = {
@@ -147,3 +147,17 @@ static void button_log(void *arg)
     log_flag = log_flag > 3 ? 3 : log_flag;
     log_time = nowtime;
 }
+
+/**
+ * @brief 将按键计数值导出为Shell变量
+ * @note
+ * - 属性: 可读可写, 整型变量
+ * - Shell中的名称: btn_count
+ * - 关联的C变量: button_press_count
+ * - 描述: shows the number of button presses
+ */
+SHELL_EXPORT_VAR(
+    SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_VAR_INT),
+    btn_count,
+    &log_flag,
+    shows the number of button presses);

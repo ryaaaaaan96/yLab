@@ -8,13 +8,18 @@
  * @par 功能描述:
  * 实现基于yDev框架的USART设备驱动，提供USART的统一抽象接口
  *
- * @par 主要特性:
+ * @par 主要功能:
+ * - USART设备的初始化和反初始化
  * - 串口数据的读写操作
+ * - DMA传输支持和管理
  * - 中断驱动的缓冲区管理
  * - 非阻塞式数据传输
+ * - USART设备的控制操作(ioctl)
  * - 完整的错误处理机制
- * - 回调函数支持
  * - 与底层yDrv USART驱动的适配
+ *
+ * @par 更新历史:
+ * - v1.0 (2025): 初始版本，完整的USART设备抽象层实现
  */
 
 // ==================== 包含文件 ====================
@@ -35,9 +40,13 @@
 
 /**
  * @brief USART设备初始化
- * @param config USART设备配置参数
- * @param handle USART设备句柄
- * @return yDevStatus_t 初始化状态
+ * @param config USART设备配置参数指针
+ * @param handle USART设备句柄指针
+ * @retval yDevStatus_t 初始化状态
+ * @retval YDEV_OK 初始化成功
+ * @retval YDEV_INVALID_PARAM 参数无效
+ * @retval YDEV_ERROR 初始化失败
+ * @note 初始化USART设备，配置底层yDrv驱动参数
  */
 static yDevStatus_t yDev_Usart_Init(void *config, void *handle)
 {

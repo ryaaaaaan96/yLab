@@ -7,6 +7,14 @@
  *
  * @par 功能描述:
  * 基于yDev框架的GPIO设备驱动，提供统一的GPIO操作接口
+ *
+ * @par 主要特性:
+ * - 统一的GPIO读写接口
+ * - 支持输入输出模式配置
+ * - 完整的GPIO配置参数管理
+ * - 中断回调机制支持
+ * - 错误处理和状态查询
+ * - 与底层yDrv GPIO驱动的适配
  */
 
 #ifndef YDEV_GPIO_H
@@ -23,27 +31,23 @@ extern "C"
     // ==================== GPIO设备特定定义 ====================
 
     /**
-     * @brief GPIO设备配置结构体
-     *
-     * @par 功能描述:
-     * 包含yDev基础配置和GPIO特定的驱动配置参数
+     * @brief yDev GPIO设备配置结构体
+     * @note 包含yDev基础配置和GPIO特定的驱动配置参数
      */
     typedef struct
     {
-        yDevConfig_t base;           /**< yDev基础配置 */
-        yDrvGpioConfig_t drv_config; /**< GPIO驱动配置 */
+        yDevConfig_t base;           /*!< yDev基础配置结构体 */
+        yDrvGpioConfig_t drv_config; /*!< GPIO底层驱动配置结构体 */
     } yDevConfig_Gpio_t;
 
     /**
-     * @brief GPIO设备句柄结构体
-     *
-     * @par 功能描述:
-     * 包含yDev基础句柄和GPIO特定的驱动句柄
+     * @brief yDev GPIO设备句柄结构体
+     * @note 包含yDev基础句柄和GPIO特定的驱动句柄
      */
     typedef struct
     {
-        yDevHandle_t base;           /**< yDev基础句柄 */
-        yDrvGpioHandle_t drv_handle; /**< GPIO驱动句柄 */
+        yDevHandle_t base;           /*!< yDev基础句柄结构体 */
+        yDrvGpioHandle_t drv_handle; /*!< GPIO底层驱动句柄 */
     } yDevHandle_Gpio_t;
 
 // ==================== yDev GPIO配置初始化宏 ====================
@@ -52,22 +56,20 @@ extern "C"
  * @brief yDev GPIO配置结构体默认初始化宏
  * @note 提供最常用的默认配置，适用于输入模式
  */
-#define YDEV_GPIO_CONFIG_DEFAULT()                 \
-    ((yDevConfig_Gpio_t)                          \
-    {                                              \
-        .base = YDEV_CONFIG_DEFAULT(),             \
-        .drv_config = YDRV_GPIO_CONFIG_DEFAULT(),  \
+#define YDEV_GPIO_CONFIG_DEFAULT()                \
+    ((yDevConfig_Gpio_t){                         \
+        .base = YDEV_CONFIG_DEFAULT(),            \
+        .drv_config = YDRV_GPIO_CONFIG_DEFAULT(), \
     })
 
 /**
  * @brief yDev GPIO句柄结构体默认初始化宏
  * @note 提供安全的默认初始化值
  */
-#define YDEV_GPIO_HANDLE_DEFAULT()                 \
-    ((yDevHandle_Gpio_t)                          \
-    {                                              \
-        .base = YDEV_HANDLE_DEFAULT(),             \
-        .drv_handle = YDRV_GPIO_HANDLE_DEFAULT(),  \
+#define YDEV_GPIO_HANDLE_DEFAULT()                \
+    ((yDevHandle_Gpio_t){                         \
+        .base = YDEV_HANDLE_DEFAULT(),            \
+        .drv_handle = YDRV_GPIO_HANDLE_DEFAULT(), \
     })
 
     // ==================== yDev GPIO初始化函数 ====================

@@ -14,6 +14,9 @@ add_subdirectory(yDev)
 
 add_subdirectory(freeRTOS)
 
+add_subdirectory(shell)
+
+
 # ------------------------------------------------------------------------------
 # 中间件库目标（示例）
 # ------------------------------------------------------------------------------
@@ -36,4 +39,5 @@ target_link_libraries(middleware
     INTERFACE
         yDev_Interface
         freeRTOS_Interface
+        shell_Interface
 )

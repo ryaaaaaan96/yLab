@@ -27,63 +27,67 @@
 
 /**
  * @brief 设备操作表结束标记
- *
- * @par 功能描述:
- * 用于标记设备操作表的结束位置，便于运行时遍历
+ * @note 用于标记设备操作表的结束位置，便于运行时遍历操作表
  */
 const yDevOps_t ydev_end_ops YLIB_SECTION(".ydev_ops_end") =
     {
-        .type = YDEV_TYPE_MAX,
-        .init = NULL,
-        .deinit = NULL,
-        .read = NULL,
-        .write = NULL,
-        .ioctl = NULL,
+        .type = YDEV_TYPE_MAX, /*!< 设备类型标记为最大值 */
+        .init = NULL,          /*!< 初始化函数指针为空 */
+        .deinit = NULL,        /*!< 反初始化函数指针为空 */
+        .read = NULL,          /*!< 读取函数指针为空 */
+        .write = NULL,         /*!< 写入函数指针为空 */
+        .ioctl = NULL,         /*!< 控制函数指针为空 */
 };
 
 /**
  * @brief 设备操作表起始标记
- *
- * @par 功能描述:
- * 用于标记设备操作表的起始位置，便于运行时遍历
+ * @note 用于标记设备操作表的起始位置，便于运行时遍历操作表
  */
 const yDevOps_t ydev_start_ops YLIB_SECTION(".ydev_ops_start") =
     {
         .type = YDEV_TYPE_START,
         .init = NULL,
-        .deinit = NULL,
-        .read = NULL,
-        .write = NULL,
-        .ioctl = NULL,
+        .deinit = NULL, /*!< 反初始化函数指针为空 */
+        .read = NULL,   /*!< 读取函数指针为空 */
+        .write = NULL,  /*!< 写入函数指针为空 */
+        .ioctl = NULL,  /*!< 控制函数指针为空 */
 };
 
-// ==================== 局部变量实现 ====================
+// ==================== 局部变量定义 ====================
+
+/**
+ * @brief 系统时间计数器
+ * @note 用于记录系统运行时间，单位为毫秒
+ */
 static size_t ydev_time_ms;
+
 // ==================== 核心API实现 ====================
 
 /**
  * @brief yLab系统初始化
- * @return yDevStatus_t 初始化状态
- *
- * @par 功能描述:
- * 初始化yLab系统，包括底层驱动初始化
+ * @retval yDevStatus_t 初始化状态
+ * @retval YDEV_OK 初始化成功
+ * @note 初始化yLab系统，包括底层yDrv驱动初始化
  */
 yDevStatus_t yLabInit(void)
 {
     // 初始化底层驱动
     yDrvInit();
 
+    // 初始化系统时间计数器
+    ydev_time_ms = 0;
     return YDEV_OK;
 }
 
 /**
- * @brief 初始化设备
- * @param config 设备配置参数
- * @param handle 设备句柄
- * @return yDevStatus_t 初始化状态
- *
- * @par 功能描述:
- * 根据配置参数初始化指定类型的设备，查找对应的设备操作表并调用初始化函数
+ * @brief 静态初始化设备
+ * @param config 设备配置参数指针
+ * @param handle 设备句柄指针
+ * @retval yDevStatus_t 初始化状态
+ * @retval YDEV_OK 初始化成功
+ * @retval YDEV_INVALID_PARAM 参数无效
+ * @retval YDEV_NOT_SUPPORTED 设备类型不支持
+ * @note 根据配置参数初始化指定类型的设备，查找对应的设备操作表并调用初始化函数
  */
 yDevStatus_t yDevInitStatic(void *config, void *handle)
 {

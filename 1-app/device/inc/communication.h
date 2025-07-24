@@ -40,7 +40,7 @@ extern "C"
      * @par 功能描述:
      * 控制指定类型的开关状态
      */
-    void MessageWrite(void *msg, uint32_t len);
+    int32_t MessageWrite(const void *msg, uint16_t len);
 
     /**
      * @brief 开关状态读取函数
@@ -50,7 +50,7 @@ extern "C"
      * @par 功能描述:
      * 读取指定类型开关的当前状态
      */
-    uint32_t MessageRead(void *msg, uint32_t len);
+    int32_t MessageRead(void *buff, uint16_t len);
 
     /**
      * @brief 开关状态读取函数

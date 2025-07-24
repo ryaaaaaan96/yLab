@@ -34,31 +34,39 @@ set(Hal_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_ll_exti.c       # 外部中断LL驱动
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_hal_gpio.c      # GPIO HAL驱动
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_hal_exti.c      # 外部中断HAL驱动
-    
+
+    # 串口通信相关驱动
+    ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_ll_usart.c      # USART LL驱动（低层驱动）
+    # ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_hal_usart.c     # USART HAL驱动
+    # ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_hal_usart_ex.c  # USART HAL扩展驱动
+
+    # SPI通讯相关驱动
+    ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_ll_spi.c       # SPI LL驱动（低层驱动）
+    # ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_hal_spi.c      # SPI HAL驱动
+    # ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_hal_spi_ex.c   # SPI HAL扩展驱动
+
     # 时钟控制相关驱动
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_ll_rcc.c        # 时钟控制LL驱动
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_ll_utils.c      # LL工具函数
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_hal_rcc.c       # 时钟控制HAL驱动
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_hal_rcc_ex.c    # 时钟控制扩展HAL驱动
-    
+
     # Flash存储器相关驱动
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_hal_flash.c     # Flash HAL驱动
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_hal_flash_ex.c  # Flash扩展HAL驱动
-    
+
     # DMA相关驱动
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_hal_dma.c       # DMA HAL驱动
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_hal_dma_ex.c    # DMA扩展HAL驱动
-    
+
     # 电源管理相关驱动
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_hal_pwr.c       # 电源管理HAL驱动
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_hal_pwr_ex.c    # 电源管理扩展HAL驱动
-    
+
     # 内核相关驱动
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_hal_cortex.c    # Cortex-M0+内核HAL驱动
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_hal.c           # HAL核心驱动（初始化等）
-    
-    # 串口通信相关驱动
-    ${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32g0xx_ll_usart.c      # USART LL驱动（低层驱动）
+
 )
 
 # ------------------------------------------------------------------------------

@@ -272,26 +272,35 @@ extern "C"
 /**
  * @brief 向上对齐到指定边界
  */
-#define ALIGN_UP(x, align) (((x) + (align) - 1) & ~((align) - 1))
-#define ALIGN_DOWN(x, align) ((x) & ~((align) - 1))
+#define YLIB_ALIGN_UP(x, align) (((x) + (align) - 1) & ~((align) - 1))
+#define YLIB_ALIGN_DOWN(x, align) ((x) & ~((align) - 1))
+
+/**
+ * @brief 判断地址是否按指定边界对齐
+ * @param addr 要检查的地址
+ * @param align 对齐边界（必须是2的幂次）
+ * @return 如果地址已对齐返回非零值，否则返回0
+ * @note align参数必须是2的幂次（如2、4、8、16、32等）
+ */
+#define YLIB_IS_ALIGNED(addr, align) (((addr) & ((align) - 1)) == 0)
 
 /**
  * @brief 判断是否为2的幂次
  */
-#define IS_POWER_OF_2(x) ((x) != 0 && ((x) & ((x) - 1)) == 0)
+#define YLIB_IS_POWER_OF_2(x) ((x) != 0 && ((x) & ((x) - 1)) == 0)
 
 /**
  * @brief 位操作宏
  */
-#define YLAB_BIT(n) (1UL << (n))
-#define YLAB_SET_BIT(x, n) ((x) |= BIT(n))
-#define YLAB_CLEAR_BIT(x, n) ((x) &= ~BIT(n))
-#define YLAB_TOGGLE_BIT(x, n) ((x) ^= BIT(n))
-#define YLAB_TEST_BIT(x, n) (((x) & BIT(n)) != 0)
-#define YLAB_MASK(n) (BIT(n) - 1)
-#define YLAB_SET_BITS(x, mask) ((x) |= (mask))
-#define YLAB_CLEAR_BITS(x, mask) ((x) &= ~(mask))
-#define YLAB_TOGGLE_BITS(x, mask) ((x) ^= (mask))
+#define YLIB_BIT(n) (1UL << (n))
+#define YLIB_SET_BIT(x, n) ((x) |= YLIB_BIT(n))
+#define YLIB_CLEAR_BIT(x, n) ((x) &= ~YLIB_BIT(n))
+#define YLIB_TOGGLE_BIT(x, n) ((x) ^= YLIB_BIT(n))
+#define YLIB_TEST_BIT(x, n) (((x) & YLIB_BIT(n)) != 0)
+#define YLIB_MASK(n) (YLIB_BIT(n) - 1)
+#define YLIB_SET_BITS(x, mask) ((x) |= (mask))
+#define YLIB_CLEAR_BITS(x, mask) ((x) &= ~(mask))
+#define YLIB_TOGGLE_BITS(x, mask) ((x) ^= (mask))
 
 /**
  * @brief 字节序转换宏

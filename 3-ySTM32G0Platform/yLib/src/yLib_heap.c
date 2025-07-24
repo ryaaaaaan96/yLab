@@ -13,7 +13,7 @@
 #include <string.h>
 
 #ifndef YLIB_HEAP_STATIC_BUFFER_SIZE
-#define YLIB_HEAP_STATIC_BUFFER_SIZE configTOTAL_HEAP_SIZE
+#define YLIB_HEAP_STATIC_BUFFER_SIZE YLIB_TOTAL_HEAP_SIZE
 #endif
 
 static uint8_t ylib_heap_static_buffer[YLIB_HEAP_STATIC_BUFFER_SIZE];

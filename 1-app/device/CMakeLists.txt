@@ -14,6 +14,7 @@ cmake_minimum_required(VERSION 3.22)
 set(APP_DEVICE_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/communication.c     # 主程序文件
     ${CMAKE_CURRENT_SOURCE_DIR}/src/switch.c     # 主程序文件
+
 )
 
 # ------------------------------------------------------------------------------

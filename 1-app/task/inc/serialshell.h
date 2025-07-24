@@ -1,21 +1,19 @@
 /**
  * @file shell_port.h
  * @author Letter (NevermindZZT@gmail.com)
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2019-02-22
- * 
+ *
  * @copyright (c) 2019 Letter
- * 
+ *
  */
 
-#ifndef __SHELL_PORT_H__
-#define __SHELL_PORT_H__
+#ifndef SERIAL_SHELL_H
+#define SERIAL_SHELL_H
 
-#include "serial.h"
 #include "shell.h"
 
-extern Shell shell;
+void ShellTaskInit(void);
 
-void userShellInit(void);
 #endif

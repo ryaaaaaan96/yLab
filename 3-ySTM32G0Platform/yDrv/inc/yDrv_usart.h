@@ -32,7 +32,6 @@ extern "C"
 
 // ==================== 包含文件 ====================
 #include "stm32g0xx_ll_usart.h"
-#include "stm32g0xx_ll_gpio.h"
 #include "stm32g0xx_ll_bus.h"
 
 #include "yDrv_basic.h"
@@ -136,11 +135,8 @@ extern "C"
      */
     typedef struct
     {
-        yDrvUsartId_t usartId;              /*!< USART实例ID */
-        yDrvGpioPin_t txPin;                /*!< TX发送引脚配置 */
-        yDrvGpioPin_t rxPin;                /*!< RX接收引脚配置 */
-        yDrvGpioPin_t rtsPin;               /*!< RTS流控引脚配置 */
-        yDrvGpioPin_t ctsPin;               /*!< CTS流控引脚配置 */
+        yDrvUsartId_t usartId; /*!< USART实例ID */
+
         uint32_t baudRate;                  /*!< 波特率设置 */
         yDrvUsartDataBits_t dataBits;       /*!< 数据位数设置 */
         yDrvUsartStopBits_t stopBits;       /*!< 停止位数设置 */
@@ -148,10 +144,16 @@ extern "C"
         yDrvUsartDirection_t direction;     /*!< 传输方向设置 */
         yDrvUsartFlowControl_t flowControl; /*!< 硬件流控设置 */
         yDrvUsartMode_t mode;               /*!< USART工作模式 */
-        uint8_t txAF;                       /*!< TX引脚复用功能选择 */
-        uint8_t rxAF;                       /*!< RX引脚复用功能选择 */
-        uint8_t ctsAF;                      /*!< CTS引脚复用功能选择 */
-        uint8_t rtsAF;                      /*!< RTS引脚复用功能选择 */
+
+        yDrvGpioPin_t txPin;  /*!< TX发送引脚配置 */
+        yDrvGpioPin_t rxPin;  /*!< RX接收引脚配置 */
+        yDrvGpioPin_t rtsPin; /*!< RTS流控引脚配置 */
+        yDrvGpioPin_t ctsPin; /*!< CTS流控引脚配置 */
+
+        uint8_t txAF;  /*!< TX引脚复用功能选择 */
+        uint8_t rxAF;  /*!< RX引脚复用功能选择 */
+        uint8_t ctsAF; /*!< CTS引脚复用功能选择 */
+        uint8_t rtsAF; /*!< RTS引脚复用功能选择 */
     } yDrvUsartConfig_t;
 
 /**

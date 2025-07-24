@@ -25,29 +25,30 @@ extern "C"
 #endif
 
 // ==================== 包含文件 ====================
-#include "yDev_basic.h"
 #include "yDrv_dma.h"
 #include "yDev.h"
 
-    // ==================== DMA传输配置结构体 ====================
+    // ==================== DMA设备特定定义 ====================
 
     /**
-     * @brief DMA传输配置结构体
+     * @brief yDev DMA设备配置结构体
+     * @note 包含yDev基础配置和DMA特定的驱动配置参数
      */
     typedef struct
     {
-        yDevConfig_t base;
-        yDrvDmaConfig_t drv_config;
+        yDevConfig_t base;          /*!< yDev基础配置结构体 */
+        yDrvDmaConfig_t drv_config; /*!< DMA底层驱动配置结构体 */
     } yDevConfig_Dma_t;
 
     // ==================== DMA设备句柄结构体 ====================
 
     /**
-     * @brief DMA设备句柄结构体
+     * @brief yDev DMA设备句柄结构体
+     * @note 包含yDev基础句柄和DMA特定的驱动句柄
      */
     typedef struct
     {
-        yDevHandle_t base;          // yDev基础句柄
+        yDevHandle_t base;          /*!< yDev基础句柄结构体 */
         yDrvDmaHandle_t drv_handle; // yDrv的DMA驱动句柄
     } yDevHandle_Dma_t;
 

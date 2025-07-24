@@ -23,7 +23,7 @@
 // ==================== 私有变量 ====================
 TaskHandle_t LedTask_Handler; /**< LED任务句柄 */
 
-// static uint8_t data_log[100];
+static uint32_t button_press_count;
 
 // ==================== 公共函数实现 ====================
 
@@ -43,17 +43,16 @@ void BlinkTaskProcess(void *pvParameters)
 {
     // 抑制未使用参数警告
     (void)pvParameters;
-    // int32_t len;
-    uint32_t button_press_count;
+
+    // 初始化按键计数
+    button_press_count = 0;
 
     // 初始化开关模块
     SwitchInit();
-    CommunicationInit();
 
     // 任务主循环
     for (;;)
     {
-        MessageLoop();
 
         // 检查按键状态
         if (SwitchRead(SWITCH_TYPE_BUTTON) != 0)
