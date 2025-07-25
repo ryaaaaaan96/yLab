@@ -1,6 +1,12 @@
 # ==============================================================================
 # yDev设备抽象层CMake构建配置文件
+# yDev设备抽象层CMake构建配置文件
 # ==============================================================================
+# 描述: yDev设备抽象层的CMake构建配置
+# 功能: 提供统一的设备操作接口，类似Linux设备驱动模型
+# 作者: YLab Development Team  
+# 版本: 1.0
+# 日期: 2025
 # 描述: yDev设备抽象层的CMake构建配置
 # 功能: 提供统一的设备操作接口，类似Linux设备驱动模型
 # 作者: YLab Development Team  
@@ -12,12 +18,14 @@ cmake_minimum_required(VERSION 3.22)
 
 # ------------------------------------------------------------------------------
 # yDev设备抽象层文件配置
+# yDev设备抽象层文件配置
 # ------------------------------------------------------------------------------
 
 # yDev头文件目录路径
 set(YDEV_INC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/inc
                  ${CMAKE_CURRENT_SOURCE_DIR})
 
+# yDev源文件列表
 # yDev源文件列表
 set(yDev_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/src/yDev.c          # yDev核心实现
@@ -29,33 +37,43 @@ set(yDev_Src
 
 # ------------------------------------------------------------------------------
 # yDev接口库定义 - 提供头文件和编译定义
+# yDev接口库定义 - 提供头文件和编译定义
 # ------------------------------------------------------------------------------
 
+# 创建yDev接口库（仅包含头文件和编译定义）
 # 创建yDev接口库（仅包含头文件和编译定义）
 add_library(yDev_Interface INTERFACE)
 
 # 设置yDev接口库的头文件包含路径
+# 设置yDev接口库的头文件包含路径
 target_include_directories(yDev_Interface 
     INTERFACE 
+        ${YDEV_INC_DIR}    # yDev头文件目录
         ${YDEV_INC_DIR}    # yDev头文件目录
 )
 
 # 设置yDev接口库的依赖关系
+# 设置yDev接口库的依赖关系
 target_link_libraries(yDev_Interface 
     INTERFACE 
+        yPlatform          # 依赖yPlatform库
         yPlatform          # 依赖yPlatform库
 )
 
 # ------------------------------------------------------------------------------
 # yDev对象库定义 - 编译源文件生成目标文件
+# yDev对象库定义 - 编译源文件生成目标文件
 # ------------------------------------------------------------------------------
 
+# 创建yDev对象库（编译源文件但不链接）
 # 创建yDev对象库（编译源文件但不链接）
 add_library(yDev 
     OBJECT 
         ${yDev_Src}        # yDev源文件列表
+        ${yDev_Src}        # yDev源文件列表
 )
 
+# 设置yDev对象库的头文件包含路径
 # 设置yDev对象库的头文件包含路径
 target_include_directories(yDev 
     PRIVATE 
