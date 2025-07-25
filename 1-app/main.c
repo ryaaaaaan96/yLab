@@ -15,7 +15,6 @@
 #include "blink.h"
 #include "yDev.h"
 #include "serialshell.h"
-#include "serialshell.h"
 // ==================== 私有函数声明 ====================
 
 /**

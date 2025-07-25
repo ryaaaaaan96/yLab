@@ -39,22 +39,10 @@ extern "C"
     /**
      * @brief yDev设备操作状态枚举
      * @note 统一的设备操作返回状态定义，用于所有yDev层函数的返回值
-     * @brief yDev设备操作状态枚举
-     * @note 统一的设备操作返回状态定义，用于所有yDev层函数的返回值
      */
     typedef enum
     {
         YDEV_OK = 0,           /*!< 操作成功完成 */
-        YDEV_ERROR,            /*!< 通用错误 */
-        YDEV_BUSY,             /*!< 设备忙，无法执行操作 */
-        YDEV_TIMEOUT,          /*!< 操作超时 */
-        YDEV_INVALID_PARAM,    /*!< 参数无效或超出范围 */
-        YDEV_NOT_INITIALIZED,  /*!< 设备未初始化 */
-        YDEV_NOT_SUPPORTED,    /*!< 操作不支持或未实现 */
-        YDEV_NO_MEMORY,        /*!< 内存不足 */
-        YDEV_DEVICE_NOT_FOUND, /*!< 设备不存在 */
-        YDEV_PERMISSION_DENIED /*!< 权限不足 */
-            YDEV_OK = 0,       /*!< 操作成功完成 */
         YDEV_ERROR,            /*!< 通用错误 */
         YDEV_BUSY,             /*!< 设备忙，无法执行操作 */
         YDEV_TIMEOUT,          /*!< 操作超时 */
@@ -93,16 +81,11 @@ extern "C"
      */
     typedef enum
     {
-        YDEV_STATE_UNINITIALIZED = 0,     /*!< 设备未初始化状态 */
-        YDEV_STATE_INITIALIZED,           /*!< 设备已初始化状态 */
-        YDEV_STATE_OPENED,                /*!< 设备已打开状态 */
-        YDEV_STATE_BUSY,                  /*!< 设备忙碌状态 */
-        YDEV_STATE_ERROR                  /*!< 设备错误状态 */
-            YDEV_STATE_UNINITIALIZED = 0, /*!< 设备未初始化状态 */
-        YDEV_STATE_INITIALIZED,           /*!< 设备已初始化状态 */
-        YDEV_STATE_OPENED,                /*!< 设备已打开状态 */
-        YDEV_STATE_BUSY,                  /*!< 设备忙碌状态 */
-        YDEV_STATE_ERROR                  /*!< 设备错误状态 */
+        YDEV_STATE_UNINITIALIZED = 0, /*!< 设备未初始化状态 */
+        YDEV_STATE_INITIALIZED,       /*!< 设备已初始化状态 */
+        YDEV_STATE_OPENED,            /*!< 设备已打开状态 */
+        YDEV_STATE_BUSY,              /*!< 设备忙碌状态 */
+        YDEV_STATE_ERROR              /*!< 设备错误状态 */
     } yDevState_t;
 
     /**
@@ -113,10 +96,6 @@ extern "C"
      */
     typedef enum
     {
-        YDEV_MODE_RDONLY = 0x01,  /*!< 只读模式 */
-        YDEV_MODE_WRONLY = 0x02,  /*!< 只写模式 */
-        YDEV_MODE_RDWR = 0x03,    /*!< 读写模式 */
-        YDEV_MODE_NONBLOCK = 0x04 /*!< 非阻塞模式 */
         YDEV_MODE_RDONLY = 0x01,  /*!< 只读模式 */
         YDEV_MODE_WRONLY = 0x02,  /*!< 只写模式 */
         YDEV_MODE_RDWR = 0x03,    /*!< 读写模式 */
@@ -209,9 +188,6 @@ extern "C"
      */
     typedef struct
     {
-        yDevType_t type;         /*!< 设备类型标识 */
-        yDevInitFunc_t init;     /*!< 设备初始化函数指针 */
-        yDevDeinitFunc_t deinit; /*!< 设备反初始化函数指针 */
         yDevType_t type;         /*!< 设备类型标识 */
         yDevInitFunc_t init;     /*!< 设备初始化函数指针 */
         yDevDeinitFunc_t deinit; /*!< 设备反初始化函数指针 */
