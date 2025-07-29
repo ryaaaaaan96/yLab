@@ -159,7 +159,11 @@ yDrvStatus_t yDrvSpiInitStatic(yDrvSpiConfig_t *config, yDrvSpiHandle_t *handle)
     {
         return YDRV_ERROR;
     }
-    handle->flagBtyeSend = (config->dataBits >= 8) ? 1 : 0;
+    handle->flagBtyeSend = (config->dataBits > 8) ? 1 : 0;
+    handle->flagCsControl = (config->csMode == YDRV_SPI_CS_SOFT) ? 1 : 0;
+    LL_SPI_SetStandard(handle->instance, LL_SPI_PROTOCOL_MOTOROLA);
+    // LL_SPI_EnableNSSPulseMgt(handle->instance);
+
     // 4. 使能SPI
     LL_SPI_Enable(handle->instance);
 

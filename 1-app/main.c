@@ -15,6 +15,7 @@
 #include "blink.h"
 #include "yDev.h"
 #include "serialshell.h"
+#include "flash.h"
 // ==================== 私有函数声明 ====================
 
 /**
@@ -29,6 +30,7 @@ static void Startup(void *pvParameters)
     // 抑制未使用参数警告
     (void)pvParameters;
     // 初始化LED闪烁任务
+    FlashInit();
     BlinkTaskInit();
     ShellTaskInit();
 

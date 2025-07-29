@@ -73,7 +73,6 @@ extern "C"
         yDevConfig_t base; /*!< yDev基础配置结构体 */
 
         yDrvSpiId_t spiId;
-        yDrvSpiDirection_t direction;
         uint16_t dataBits;
         uint16_t crc;
         yDrvSpiCsMode_t csMode;

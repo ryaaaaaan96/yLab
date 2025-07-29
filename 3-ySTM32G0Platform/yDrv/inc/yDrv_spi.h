@@ -158,7 +158,9 @@ extern "C"
         yDrvGpioInfo_t misoPinInfo;
         yDrvGpioInfo_t mosiPinInfo;
         yDrvGpioInfo_t csPinInfo;
-        uint32_t flagBtyeSend;
+        uint8_t flagBtyeSend;
+        uint8_t flagCsControl; /*!< CS控制标志，0表示软件控制CS，1表示硬件控制CS */
+
     } yDrvSpiHandle_t;
 
     // ==================== 公共函数声明 ====================
@@ -202,7 +204,7 @@ extern "C"
      */
     YLIB_INLINE int32_t yDrvSpiWriteByte(yDrvSpiHandle_t *handle, const void *data)
     {
-        if (!LL_SPI_IsActiveFlag_TXE(handle->instance))
+        if (LL_SPI_IsActiveFlag_TXE(handle->instance) == 0)
         {
             return 0;
         }
@@ -228,7 +230,7 @@ extern "C"
      */
     YLIB_INLINE int32_t yDrvSpiReadByte(yDrvSpiHandle_t *handle, void *pData)
     {
-        if (!LL_SPI_IsActiveFlag_RXNE(handle->instance))
+        if (LL_SPI_IsActiveFlag_RXNE(handle->instance) == 0)
         {
             return 0;
         }
@@ -253,6 +255,11 @@ extern "C"
      */
     YLIB_INLINE yDrvStatus_t yDrvSpiCsControl(yDrvSpiHandle_t *handle, uint8_t state)
     {
+        if (handle->flagCsControl == 0)
+        {
+            return YDRV_OK;
+        }
+
         if (handle == NULL || handle->csPinInfo.flag == 0)
         {
             return YDRV_INVALID_PARAM;
@@ -260,11 +267,11 @@ extern "C"
 
         if (state == 0)
         {
-            LL_GPIO_SetOutputPin(handle->csPinInfo.port, handle->csPinInfo.pinMask);
+            LL_GPIO_ResetOutputPin(handle->csPinInfo.port, handle->csPinInfo.pinMask);
         }
         else
         {
-            LL_GPIO_ResetOutputPin(handle->csPinInfo.port, handle->csPinInfo.pinMask);
+            LL_GPIO_SetOutputPin(handle->csPinInfo.port, handle->csPinInfo.pinMask);
         }
 
         return YDRV_OK;

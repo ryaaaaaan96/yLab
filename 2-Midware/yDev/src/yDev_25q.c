@@ -58,23 +58,23 @@ static const uint32_t IdentifyChip25q[YDEV_25Q_TYPE_UNKNOWN] = {
 // ==================== 私有函数声明 ====================
 
 /**
- * @brief 25Q SPI传输单字节
+ * @brief 25Q SPI数据传输函数
  * @param handle 25Q设备句柄指针
- * @param tx_data 发送数据
- * @retval uint8_t 接收到的数据
- * @note 进行单字节SPI双向传输
+ * @param tx_data 发送数据缓冲区指针，为NULL时发送0xFF
+ * @param rx_buff 接收数据缓冲区指针，为NULL时丢弃接收数据
+ * @param size 传输数据大小
+ * @retval int32_t 实际传输的字节数
+ * @note 进行SPI双向数据传输，支持单独发送或接收
  */
-static int32_t
-yDev25q_Spi_Transfer(yDevHandle_25q_t *handle, const void *tx_data, void *rx_buff, uint32_t size);
+static int32_t yDev25q_Spi_Transfer(yDevHandle_25q_t *handle, const void *tx_data, void *rx_buff, uint32_t size);
 /**
  * @brief 读取25Q Flash状态寄存器
  * @param handle 25Q设备句柄指针
- * @param reg_num 状态寄存器编号 (1=状态寄存器1, 2=状态寄存器2, 3=状态寄存器3)
- * @retval uint8_t 状态寄存器的值
- * @retval 0x00-0xFF 读取到的状态寄存器值
- * @note 状态寄存器1 (0x05): BUSY, WEL, BP位等写保护和忙状态
- * @note 状态寄存器2 (0x35): QE, SRL, LB等四线模式和安全寄存器锁定
- * @note 状态寄存器3 (0x15): WPS, ADS, ADP等写保护选择和驱动强度
+ * @param reg_num 状态寄存器编号
+ *                - 0x05: 状态寄存器1 (BUSY, WEL, BP位等写保护和忙状态)
+ *                - 0x35: 状态寄存器2 (QE, SRL, LB等四线模式和安全寄存器锁定)
+ *                - 0x15: 状态寄存器3 (WPS, ADS, ADP等写保护选择和驱动强度)
+ * @retval uint8_t 状态寄存器的值 (0x00-0xFF)
  * @note 通过SPI命令读取指定状态寄存器的当前值
  */
 static uint8_t yDev25q_ReadReg(yDevHandle_25q_t *handle, uint8_t reg_num);
@@ -84,9 +84,9 @@ static uint8_t yDev25q_ReadReg(yDevHandle_25q_t *handle, uint8_t reg_num);
  * @param handle 25Q设备句柄指针
  * @param timeout_ms 超时时间(毫秒)
  * @retval yDrvStatus_t 操作状态
- * @retval YDRV_OK 芯片已就绪
- * @retval YDRV_INVALID_PARAM 参数无效
- * @retval YDRV_TIMEOUT 等待超时
+ *         - YDRV_OK: 芯片已就绪
+ *         - YDRV_INVALID_PARAM: 参数无效
+ *         - YDRV_TIMEOUT: 等待超时
  * @note 通过读取状态寄存器检查BUSY位，等待Flash操作完成
  * @note 适用于页编程、扇区擦除、芯片擦除等需要等待的操作
  */
@@ -95,29 +95,30 @@ static yDrvStatus_t yDev25q_WaitBusy(yDevHandle_25q_t *handle, uint32_t timeout_
 /**
  * @brief 读取25Q设备JEDEC ID
  * @param handle 25Q设备句柄指针
- * @retval uint32_t JEDEC ID值
- * @note 读取25Q设备的JEDEC制造商ID和设备ID
+ * @retval uint32_t JEDEC ID值 (24位有效)
+ * @note 读取25Q设备的JEDEC制造商ID和设备ID，用于芯片识别
  */
 static uint32_t yDev25qReadJedecId(yDevHandle_25q_t *handle);
 
 /**
  * @brief 根据JEDEC ID识别芯片型号
- * @param jedec_id JEDEC ID
- * @retval yDev25qType_t 芯片型号
- * @note 解析JEDEC ID并返回对应的芯片型号
+ * @param jedec_id JEDEC ID值
+ * @retval yDev25qType_t 芯片型号枚举值
+ * @note 解析JEDEC ID并返回对应的芯片型号，未识别时返回YDEV_25Q_TYPE_UNKNOWN
  */
 static yDev25qType_t yDev25q_IdentifyChip(uint32_t jedec_id);
 
 /**
- * @brief 25Q页编程操作
+ * @brief 25Q Flash页编程操作
  * @param handle 25Q设备句柄指针
- * @param start_address 页编程起始地址（必须页对齐）
- * @param data 页编程数据指针（最多256字节）
+ * @param start_address 页编程起始地址 (必须页对齐)
+ * @param data 页编程数据指针 (固定256字节)
  * @retval yDrvStatus_t 操作状态
- * @retval YDRV_OK 页编程成功
- * @retval YDRV_INVALID_PARAM 参数无效
- * @retval YDRV_TIMEOUT 操作超时
- * @note 执行25Q Flash的页编程操作，地址必须页对齐，数据大小不超过256字节
+ *         - YDRV_OK: 页编程成功
+ *         - YDRV_INVALID_PARAM: 参数无效
+ *         - YDRV_TIMEOUT: 操作超时
+ *         - YDRV_ERROR: SPI通信错误
+ * @note 执行25Q Flash的页编程操作，地址必须页对齐，数据大小固定为256字节
  */
 static yDrvStatus_t yDev25q_WritePage(yDevHandle_25q_t *handle, uint32_t start_address, const uint8_t *data);
 
@@ -141,15 +142,22 @@ static yDrvStatus_t yDev25q_WritePage(yDevHandle_25q_t *handle, uint32_t start_a
  * @param start_address 擦除起始地址
  * @param size 擦除数据大小
  * @retval yDrvStatus_t 操作状态
- * @retval YDRV_OK 擦除成功
- * @retval YDRV_INVALID_PARAM 参数无效
- * @retval YDRV_TIMEOUT 操作超时
- * @retval YDRV_ERROR 擦除失败
- * @note 根据擦除大小自动选择扇区擦除或块擦除操作，地址会自动对齐到扇区边界
+ *         - YDRV_OK: 擦除成功
+ *         - YDRV_INVALID_PARAM: 参数无效
+ *         - YDRV_TIMEOUT: 操作超时
+ *         - YDRV_ERROR: 擦除失败
+ * @note 根据擦除大小自动选择扇区擦除(4KB)或块擦除(64KB)操作
+ * @note 地址会自动对齐到扇区边界
  */
 static yDrvStatus_t yDev25q_Erase(yDevHandle_25q_t *handle, uint32_t start_address, uint32_t size);
-// ==================== 25Q初始化函数实现 ====================
 
+// ==================== 25Q配置和句柄初始化函数 ====================
+
+/**
+ * @brief 初始化25Q设备配置结构体
+ * @param config 25Q设备配置结构体指针
+ * @note 将配置结构体初始化为默认值，用户需要根据实际硬件修改引脚配置
+ */
 void yDev25qConfigStructInit(yDevConfig_25q_t *config)
 {
     if (config == NULL)
@@ -161,12 +169,11 @@ void yDev25qConfigStructInit(yDevConfig_25q_t *config)
     yDevConfigStructInit(&config->base);
 
     // 初始化25Q特定配置为默认值
-    config->spiId = YDRV_SPI_SOFT;                       // 默认使用软件SPI
-    config->direction = YDRV_SPI_DIR_2LINES_FULL_DUPLEX; // 默认全双工
-    config->dataBits = 8;                                // 8位数据
-    config->crc = 0;                                     // 不使用CRC
-    config->csMode = YDRV_SPI_CS_SOFT;                   // 软件控制CS
-    config->speed = YDRV_SPI_SPEED_LEVEL0;               // 默认速度等级0
+    config->spiId = YDRV_SPI_SOFT;         // 默认使用软件SPI
+    config->dataBits = 8;                  // 8位数据
+    config->crc = 0;                       // 不使用CRC
+    config->csMode = YDRV_SPI_CS_SOFT;     // 软件控制CS
+    config->speed = YDRV_SPI_SPEED_LEVEL0; // 默认速度等级0
 
     // 默认引脚配置（用户需要根据实际硬件修改）
     config->sckPin = YDRV_PINNULL;  // SCK引脚
@@ -181,6 +188,11 @@ void yDev25qConfigStructInit(yDevConfig_25q_t *config)
     config->csAF = 0;   // 复用功能0
 }
 
+/**
+ * @brief 初始化25Q设备句柄结构体
+ * @param handle 25Q设备句柄结构体指针
+ * @note 将句柄结构体初始化为默认值
+ */
 void yDev25qHandleStructInit(yDevHandle_25q_t *handle)
 {
     if (handle == NULL)
@@ -188,13 +200,15 @@ void yDev25qHandleStructInit(yDevHandle_25q_t *handle)
         return;
     }
 
-    // 初始化基础句柄
+    // 初始化基础句柄和SPI句柄
     yDevHandleStructInit(&handle->base);
     yDrvSpiHandleStructInit(&handle->spi_handle);
-    // 初始化25Q特定句柄为默认值
+
+    // 初始化25Q特定参数为默认值
     handle->chip_type = YDEV_25Q_TYPE_UNKNOWN;
+    handle->size = 0;
     handle->align = 0;
-    handle->address = 0; // 默认地址为0
+    handle->address = 0;
 }
 
 // ==================== 25Q设备操作函数实现 ====================
@@ -204,9 +218,9 @@ void yDev25qHandleStructInit(yDevHandle_25q_t *handle)
  * @param config 25Q设备配置参数指针
  * @param handle 25Q设备句柄指针
  * @retval yDevStatus_t 初始化状态
- * @retval YDEV_OK 初始化成功
- * @retval YDEV_INVALID_PARAM 参数无效
- * @retval YDEV_ERROR 初始化失败
+ *         - YDEV_OK: 初始化成功
+ *         - YDEV_INVALID_PARAM: 参数无效
+ *         - YDEV_ERROR: 初始化失败
  * @note 初始化25Q设备，配置底层SPI驱动参数并识别芯片型号
  */
 static yDevStatus_t yDev_25q_Init(void *config, void *handle)
@@ -228,15 +242,15 @@ static yDevStatus_t yDev_25q_Init(void *config, void *handle)
     // 构建SPI配置
     yDrvSpiConfigStructInit(&spi_config);
     spi_config.spiId = config_25q->spiId;
-    spi_config.direction = config_25q->direction;
+    spi_config.direction = YDRV_SPI_DIR_2LINES_FULL_DUPLEX; // 默认全双工
     spi_config.dataBits = config_25q->dataBits;
     spi_config.crc = config_25q->crc;
-    spi_config.mode = LL_SPI_MODE_MASTER;
-    spi_config.polarity = LL_SPI_POLARITY_LOW;
-    spi_config.phase = LL_SPI_PHASE_1EDGE;
+    spi_config.mode = YDRV_SPI_MODE_MASTER;
+    spi_config.polarity = YDRV_SPI_POLARITY_LOW;
+    spi_config.phase = YDRV_SPI_PHASE_1EDGE;
     spi_config.csMode = config_25q->csMode;
     spi_config.speed = config_25q->speed;
-    spi_config.bitOrder = LL_SPI_MSB_FIRST;
+    spi_config.bitOrder = YDRV_SPI_BITORDER_MSB;
     spi_config.sckPin = config_25q->sckPin;
     spi_config.misoPin = config_25q->misoPin;
     spi_config.mosiPin = config_25q->mosiPin;
@@ -256,6 +270,7 @@ static yDevStatus_t yDev_25q_Init(void *config, void *handle)
     jedec_id = yDev25qReadJedecId(handle_25q);
     handle_25q->chip_type = yDev25q_IdentifyChip(jedec_id);
 
+    // 根据芯片型号识别结果设置Flash大小
     if (handle_25q->chip_type == YDEV_25Q_TYPE_UNKNOWN)
     {
         handle_25q->base.errno = YDEV_25Q_ERRNO_CHIP_NOT_FOUND;
@@ -263,12 +278,13 @@ static yDevStatus_t yDev_25q_Init(void *config, void *handle)
         return YDEV_ERROR;
     }
 
-    // 根据JEDEC ID直接计算Flash大小
+    // 根据JEDEC ID计算Flash容量
     // JEDEC ID格式: [制造商ID(8位)][设备类型(8位)][容量ID(8位)]
-    // 容量ID: 0x15=2MB, 0x16=4MB, 0x17=8MB, 0x18=16MB
-    if ((jedec_id & 0xFF) >= 0x10 && (jedec_id & 0xFF) <= 0x20)
+    // 容量ID对应关系: 0x15=2MB, 0x16=4MB, 0x17=8MB, 0x18=16MB, 0x19=32MB
+    uint8_t capacity_id = jedec_id & 0xFF;
+    if (capacity_id >= 0x10 && capacity_id <= 0x20)
     {
-        handle_25q->size = 1 << (jedec_id & 0xFF); // 2^(jedec_id & 0xFF)
+        handle_25q->size = 1UL << capacity_id; // 2^capacity_id 字节
     }
     else
     {
@@ -279,9 +295,13 @@ static yDevStatus_t yDev_25q_Init(void *config, void *handle)
 }
 
 /**
- * @brief W25Q设备反初始化
- * @param handle W25Q设备句柄
- * @return yDevStatus_t 操作状态
+ * @brief 25Q设备反初始化
+ * @param handle 25Q设备句柄指针
+ * @retval yDevStatus_t 操作状态
+ *         - YDEV_OK: 反初始化成功
+ *         - YDEV_INVALID_PARAM: 参数无效
+ *         - YDEV_ERROR: 反初始化失败
+ * @note 释放25Q设备资源，反初始化底层SPI驱动
  */
 static yDevStatus_t yDev_25q_Deinit(void *handle)
 {
@@ -301,19 +321,20 @@ static yDevStatus_t yDev_25q_Deinit(void *handle)
         return YDEV_ERROR;
     }
 
-    // 重置芯片类型
+    // 重置设备状态
     handle_25q->chip_type = YDEV_25Q_TYPE_UNKNOWN;
+    handle_25q->size = 0;
 
     return YDEV_OK;
 }
 
 /**
- * @brief W25Q设备读取操作
- * @param handle W25Q设备句柄
- * @param buffer 读取缓冲区
- * @param size 缓冲区大小
- * @return int32_t 实际读取的字节数，-1表示错误
- * @note 从W25Q Flash中读取数据，自动处理地址参数
+ * @brief 25Q设备读取操作
+ * @param handle 25Q设备句柄指针
+ * @param buffer 读取数据缓冲区指针
+ * @param size 读取数据大小
+ * @retval int32_t 实际读取的字节数，-1表示错误
+ * @note 从25Q Flash中读取数据，使用设备句柄中的address字段作为起始地址
  */
 static int32_t yDev_25q_Read(void *handle, void *buffer, uint16_t size)
 {
@@ -348,37 +369,43 @@ static int32_t yDev_25q_Read(void *handle, void *buffer, uint16_t size)
         return -1;
     }
 
-    // 开始读取操作
+    // 构建读取命令
     yDrvSpiCsControl(&handle_25q->spi_handle, 1); // 选中芯片(CS拉低)
     read_cmd[0] = YDEV_25Q_CMD_READ_DATA;
-    read_cmd[1] = (handle_25q->address >> 16) & 0xFF; // 高字节
-    read_cmd[2] = (handle_25q->address >> 8) & 0xFF;  // 中字节
-    read_cmd[3] = handle_25q->address & 0xFF;
+    read_cmd[1] = (handle_25q->address >> 16) & 0xFF; // 地址高字节
+    read_cmd[2] = (handle_25q->address >> 8) & 0xFF;  // 地址中字节
+    read_cmd[3] = handle_25q->address & 0xFF;         // 地址低字节
+
     if (yDev25q_Spi_Transfer(handle_25q, read_cmd, NULL, 4) != 4) // 发送读取命令和地址
     {
         yDrvSpiCsControl(&handle_25q->spi_handle, 0); // 取消选中
-        return 0;                                     // 读取失败
+        handle_25q->base.errno = YDEV_25Q_ERRNO_SPI_ERROR;
+        return -1;
     }
 
-    // 读取数据
-
+    // 逐字节读取数据
     start_time = yDevGetTimeMS();
-    write_data = 0xFF; // 发送空数据以读取Flash数据
-    read_buff = (uint8_t *)buffer;
+    write_data = 0xFF; // 发送空数据以时钟Flash输出数据
     index = 0;
+
     while (index < size)
     {
+        // 检查超时
         if (yDevGetTimeMS() - start_time > handle_25q->base.timeOutMs)
         {
             yDrvSpiCsControl(&handle_25q->spi_handle, 0); // 取消选中(CS拉高)
             handle_25q->address += index;
-            return index;
+            handle_25q->base.errno = YDEV_25Q_ERRNO_TIMEOUT;
+            return (int32_t)index;
         }
+
+        // 发送空字节并读取数据
         len = yDrvSpiWriteByte(&handle_25q->spi_handle, &write_data);
         if (len == 0)
         {
-            continue; // 如果写入失败，继续下一个字节
+            continue; // 如果写入失败，重试
         }
+
         len = yDrvSpiReadByte(&handle_25q->spi_handle, &read_buff[index]);
         index += len;
     }
@@ -392,12 +419,13 @@ static int32_t yDev_25q_Read(void *handle, void *buffer, uint16_t size)
 }
 
 /**
- * @brief W25Q设备写入操作（页编程）
- * @param handle W25Q设备句柄
- * @param buffer 写入缓冲区
- * @param size 写入大小
- * @return int32_t 实际写入的字节数，-1表示错误
- * @note 向W25Q Flash写入数据，自动处理页边界和写使能
+ * @brief 25Q设备写入操作 (页编程)
+ * @param handle 25Q设备句柄指针
+ * @param buffer 写入数据缓冲区指针
+ * @param size 写入数据大小
+ * @retval int32_t 实际写入的字节数，-1表示错误
+ * @note 向25Q Flash写入数据，自动处理页边界和写使能
+ * @note 使用设备句柄中的address字段作为起始地址
  */
 static int32_t yDev_25q_Write(void *handle, const void *buffer, uint16_t size)
 {
@@ -426,10 +454,10 @@ static int32_t yDev_25q_Write(void *handle, const void *buffer, uint16_t size)
 
     current_address = handle_25q->address;
 
-    // 按页写入数据
+    // 按页写入数据循环
     while (total_written < size)
     {
-        // 计算当前页内偏移和可写入大小
+        // 计算当前页内偏移和本次写入大小
         page_offset = current_address % YDEV_25Q_PAGE_SIZE;
         write_size = YDEV_25Q_PAGE_SIZE - page_offset;
         if (write_size > (size - total_written))
@@ -437,13 +465,13 @@ static int32_t yDev_25q_Write(void *handle, const void *buffer, uint16_t size)
             write_size = size - total_written;
         }
 
-        // 如果不是整页写入，需要读取-修改-写入
+        // 处理非对齐写入 (读取-修改-写入)
         if (page_offset != 0 || write_size != YDEV_25Q_PAGE_SIZE)
         {
             uint8_t page_buffer[YDEV_25Q_PAGE_SIZE];
             uint32_t page_start = current_address & ~(YDEV_25Q_PAGE_SIZE - 1);
 
-            // 读取整页数据
+            // 保存当前地址并读取整页数据
             uint32_t saved_address = handle_25q->address;
             handle_25q->address = page_start;
             if (yDev_25q_Read(handle, page_buffer, YDEV_25Q_PAGE_SIZE) != YDEV_25Q_PAGE_SIZE)
@@ -452,17 +480,15 @@ static int32_t yDev_25q_Write(void *handle, const void *buffer, uint16_t size)
                 return -1;
             }
 
-            // 修改页数据
+            // 修改页数据并写入整页
             memcpy(&page_buffer[page_offset], &write_buff[total_written], write_size);
-
-            // 写入整页
             if (yDev25q_WritePage(handle_25q, page_start, page_buffer) != YDRV_OK)
             {
                 handle_25q->base.errno = YDEV_25Q_ERRNO_WRITE_FAIL;
                 return -1;
             }
 
-            handle_25q->address = saved_address;
+            handle_25q->address = saved_address; // 恢复地址
         }
         else
         {
@@ -486,11 +512,16 @@ static int32_t yDev_25q_Write(void *handle, const void *buffer, uint16_t size)
 }
 
 /**
- * @brief W25Q设备控制操作
- * @param handle W25Q设备句柄
+ * @brief 25Q设备控制操作
+ * @param handle 25Q设备句柄指针
  * @param cmd 控制命令
- * @param arg 命令参数
- * @return yDevStatus_t 操作状态
+ * @param arg 命令参数指针
+ * @retval yDevStatus_t 操作状态
+ *         - YDEV_OK: 操作成功
+ *         - YDEV_INVALID_PARAM: 参数无效
+ *         - YDEV_NOT_SUPPORTED: 不支持的命令
+ *         - YDEV_ERROR: 操作失败
+ * @note 执行25Q设备的控制操作，如芯片擦除、读取JEDEC ID等
  */
 static yDevStatus_t yDev_25q_Ioctl(void *handle, uint32_t cmd, void *arg)
 {
@@ -507,7 +538,7 @@ static yDevStatus_t yDev_25q_Ioctl(void *handle, uint32_t cmd, void *arg)
     switch (cmd)
     {
     case YDEV_25Q_IOCTL_CHIP_ERASE:
-        // 芯片擦除
+        // 全片擦除操作
         if (arg != NULL)
         {
             uint32_t *result = (uint32_t *)arg;
@@ -530,9 +561,17 @@ static yDevStatus_t yDev_25q_Ioctl(void *handle, uint32_t cmd, void *arg)
     }
 }
 
-// ==================== W25Q基础操作函数实现 ====================
+// ==================== 25Q私有函数实现 ====================
 
-// ==================== 私有函数实现 ====================
+/**
+ * @brief 25Q SPI数据传输函数实现
+ * @param handle 25Q设备句柄指针
+ * @param tx_data 发送数据缓冲区指针，为NULL时发送临时数据
+ * @param rx_buff 接收数据缓冲区指针，为NULL时丢弃接收数据
+ * @param size 传输数据大小
+ * @retval int32_t 实际传输的字节数
+ * @note 进行SPI双向数据传输，支持单独发送或接收
+ */
 static int32_t yDev25q_Spi_Transfer(yDevHandle_25q_t *handle,
                                     const void *tx_data,
                                     void *rx_buff,
@@ -544,82 +583,124 @@ static int32_t yDev25q_Spi_Transfer(yDevHandle_25q_t *handle,
     const uint8_t *write_buff;
     uint8_t *read_buff;
     uint32_t temp_data;
+    uint8_t flag;
 
-    start_time = yDevGetTimeMS();
-
+    // 设置发送和接收缓冲区指针
     write_buff = (tx_data == NULL) ? (const uint8_t *)&temp_data : (const uint8_t *)tx_data;
     read_buff = (rx_buff == NULL) ? (uint8_t *)&temp_data : (uint8_t *)rx_buff;
+
+    // 开始计时
+    start_time = yDevGetTimeMS();
     index = 0;
+    temp_data = 0xFF; // 默认发送0xFF
+    flag = 1;
+
+    // 逐字节传输数据
     while (index < size)
     {
+        // 检查超时
         if (yDevGetTimeMS() - start_time > handle->base.timeOutMs)
         {
-            return index;
+            return (int32_t)index;
         }
 
-        len = yDrvSpiWriteByte(&handle->spi_handle, write_buff);
+        // 发送一个字节
+        if (flag == 1)
+        {
+            len = yDrvSpiWriteByte(&handle->spi_handle, write_buff);
+            if (len == 0)
+            {
+                continue; // 发送失败，重试
+            }
+            flag = 0; // 标记发送成功
+            write_buff += ((tx_data == NULL) ? 0 : len);
+        }
+        // 更新发送指针和接收数据
+        len = yDrvSpiReadByte(&handle->spi_handle, read_buff);
         if (len == 0)
         {
-            continue; // 如果写入失败，继续下一个字节
+            continue; // 发送失败，重试
         }
-        write_buff += (tx_data == NULL) ? 0 : len;
-        yDrvSpiReadByte(&handle->spi_handle, read_buff);
-        read_buff += (rx_buff == NULL) ? 0 : len;
+        flag = 1; // 标记发送成功
+        read_buff += ((rx_buff == NULL) ? 0 : len);
         index += len;
     }
-    return index; // 成功
+
+    return (int32_t)index;
 }
+/**
+ * @brief 读取25Q Flash状态寄存器实现
+ * @param handle 25Q设备句柄指针
+ * @param reg 状态寄存器命令字节
+ * @retval uint8_t 状态寄存器的值，读取失败时返回0xFF
+ * @note 通过SPI发送寄存器读取命令并接收状态值
+ */
 static uint8_t yDev25q_ReadReg(yDevHandle_25q_t *handle, uint8_t reg)
 {
     uint8_t write_data[2];
     uint8_t read_data[2];
 
-    write_data[0] = reg;                                               // 读取状态寄存器命令
-    yDrvSpiCsControl(&handle->spi_handle, 1);                          // 选中芯片
-    if (yDev25q_Spi_Transfer(handle, &write_data, &read_data, 2) != 2) // 发送状态寄存器命令
+    write_data[0] = reg;                      // 状态寄存器读取命令
+    yDrvSpiCsControl(&handle->spi_handle, 1); // 选中芯片
+
+    if (yDev25q_Spi_Transfer(handle, write_data, read_data, 2) != 2) // 发送命令并接收数据
     {
         yDrvSpiCsControl(&handle->spi_handle, 0); // 取消选中
         return 0xFF;                              // 读取失败
     }
-    yDrvSpiCsControl(&handle->spi_handle, 0); // 取消选中
 
+    yDrvSpiCsControl(&handle->spi_handle, 0); // 取消选中
     return read_data[1];
 }
 
+/**
+ * @brief 等待25Q Flash芯片就绪实现
+ * @param handle 25Q设备句柄指针
+ * @param timeout_ms 超时时间(毫秒)
+ * @retval yDrvStatus_t 操作状态
+ * @note 根据芯片类型选择对应的状态寄存器和BUSY位检查
+ */
 static yDrvStatus_t yDev25q_WaitBusy(yDevHandle_25q_t *handle, uint32_t timeout_ms)
 {
     uint32_t start_time;
     uint8_t status;
-    uint32_t reg;
-    uint32_t idle_status;
+    uint8_t reg_cmd;
+    uint8_t busy_mask;
 
-    switch ((handle->chip_type) & 0xFF00)
+    // 根据芯片类型确定状态寄存器和BUSY位
+    switch (handle->chip_type & 0xFF00)
     {
-    case 0xEF00: // W25Q系列芯片
-        reg = 0x05;
-        idle_status = YDEV_25Q_STATUS_W25Q_BUSY;
+    case 0xEF00:                               // W25Q系列芯片
+        reg_cmd = 0x05;                        // 状态寄存器1读取命令
+        busy_mask = YDEV_25Q_STATUS_W25Q_BUSY; // BUSY位掩码
         break;
     default:
         return YDRV_INVALID_PARAM; // 不支持的芯片类型
     }
 
-    // 获取当前时间
+    // 轮询检查BUSY位直到芯片就绪或超时
     start_time = yDevGetTimeMS();
     do
     {
-        status = yDev25q_ReadReg(handle, reg);
-        if ((status & idle_status) == 0)
+        status = yDev25q_ReadReg(handle, reg_cmd);
+        if ((status & busy_mask) == 0)
         {
-            return YDRV_OK;
+            return YDRV_OK; // 芯片就绪
         }
-
     } while ((yDevGetTimeMS() - start_time) <= timeout_ms);
 
-    return YDRV_TIMEOUT;
+    return YDRV_TIMEOUT; // 超时
 }
 
+/**
+ * @brief 根据JEDEC ID识别芯片型号实现
+ * @param jedec_id JEDEC ID值
+ * @retval yDev25qType_t 芯片型号枚举值
+ * @note 遍历已知芯片ID表进行匹配识别
+ */
 static yDev25qType_t yDev25q_IdentifyChip(uint32_t jedec_id)
 {
+    // 遍历芯片ID表进行匹配
     for (yDev25qType_t i = YDEV_25Q_TYPE_W25Q16; i < YDEV_25Q_TYPE_UNKNOWN; i++)
     {
         if (IdentifyChip25q[i] == jedec_id)
@@ -630,38 +711,42 @@ static yDev25qType_t yDev25q_IdentifyChip(uint32_t jedec_id)
     return YDEV_25Q_TYPE_UNKNOWN;
 }
 
+/**
+ * @brief 读取25Q设备JEDEC ID实现
+ * @param handle 25Q设备句柄指针
+ * @retval uint32_t JEDEC ID值，读取失败时返回0
+ * @note 发送0x9F命令读取3字节JEDEC ID
+ */
 static uint32_t yDev25qReadJedecId(yDevHandle_25q_t *handle)
 {
-    uint8_t cmd = 0x9F; // JEDEC ID 读取命令
-    uint8_t jedec_data[3];
+    uint8_t cmd[4] = {0x9F, 0xFF, 0xFF, 0xFF}; // JEDEC ID读取命令
+    uint8_t jedec_data[4] = {0};               // 用于存储读取的JEDEC ID数据
     uint32_t jedec_id = 0;
 
-    // 等待芯片就绪
-    if (yDev25q_WaitBusy(handle, YDEV_25Q_TIMEOUT_PAGE_PROGRAM) != YDRV_OK)
+    // 读取3字节JEDEC ID数据
+    yDrvSpiCsControl(&handle->spi_handle, 0); // 选中
+    if (yDev25q_Spi_Transfer(handle, &cmd, &jedec_data[0], 4) != 4)
     {
+        yDrvSpiCsControl(&handle->spi_handle, 1); // 取消选中
         return 0;
     }
+    yDrvSpiCsControl(&handle->spi_handle, 1); // 取消选中
 
-    // 发送JEDEC ID读取命令
-    yDrvSpiCsControl(&handle->spi_handle, 1); // 选中芯片
-    if (yDev25q_Spi_Transfer(handle, &cmd, NULL, 1) != 1)
-    {
-        yDrvSpiCsControl(&handle->spi_handle, 0); // 取消选中
-        return 0;
-    }
-
-    // 读取3字节JEDEC ID
-    if (yDev25q_Spi_Transfer(handle, NULL, jedec_data, 3) != 3)
-    {
-        yDrvSpiCsControl(&handle->spi_handle, 0); // 取消选中
-        return 0;
-    }
-    yDrvSpiCsControl(&handle->spi_handle, 0); // 取消选中
-
-    // 组合JEDEC ID
-    jedec_id = ((uint32_t)jedec_data[0] << 16) | ((uint32_t)jedec_data[1] << 8) | jedec_data[2];
+    // 组合24位JEDEC ID
+    jedec_id = ((uint32_t)jedec_data[1] << 16) |
+               ((uint32_t)jedec_data[2] << 8) |
+               (uint32_t)jedec_data[3];
     return jedec_id;
 }
+
+/**
+ * @brief 25Q Flash页编程操作实现
+ * @param handle 25Q设备句柄指针
+ * @param start_address 页编程起始地址
+ * @param write_data 页编程数据指针
+ * @retval yDrvStatus_t 操作状态
+ * @note 执行完整的页编程流程：等待就绪->写使能->发送命令和地址->发送数据->等待完成
+ */
 static yDrvStatus_t yDev25q_WritePage(yDevHandle_25q_t *handle, uint32_t start_address, const uint8_t *write_data)
 {
     uint8_t write_enable_cmd = YDEV_25Q_CMD_WRITE_ENABLE;
@@ -674,7 +759,7 @@ static yDrvStatus_t yDev25q_WritePage(yDevHandle_25q_t *handle, uint32_t start_a
         return YDRV_TIMEOUT;
     }
 
-    // 2. 写使能
+    // 2. 发送写使能命令
     yDrvSpiCsControl(&handle->spi_handle, 1); // 选中芯片(CS拉低)
     if (yDev25q_Spi_Transfer(handle, &write_enable_cmd, NULL, 1) != 1)
     {
@@ -685,8 +770,7 @@ static yDrvStatus_t yDev25q_WritePage(yDevHandle_25q_t *handle, uint32_t start_a
     yDrvSpiCsControl(&handle->spi_handle, 0); // 取消选中
 
     // 3. 发送页编程命令和地址
-    yDrvSpiCsControl(&handle->spi_handle, 1); // 选中芯片(CS拉低)
-
+    yDrvSpiCsControl(&handle->spi_handle, 1);    // 选中芯片(CS拉低)
     write_cmd[0] = YDEV_25Q_CMD_PAGE_PROGRAM;    // 页编程命令
     write_cmd[1] = (start_address >> 16) & 0xFF; // 地址高字节
     write_cmd[2] = (start_address >> 8) & 0xFF;  // 地址中字节
@@ -706,7 +790,6 @@ static yDrvStatus_t yDev25q_WritePage(yDevHandle_25q_t *handle, uint32_t start_a
         handle->base.errno = YDEV_25Q_ERRNO_SPI_ERROR;
         return YDRV_ERROR;
     }
-
     yDrvSpiCsControl(&handle->spi_handle, 0); // 取消选中(CS拉高)
 
     // 5. 等待页编程完成
@@ -721,6 +804,15 @@ static yDrvStatus_t yDev25q_WritePage(yDevHandle_25q_t *handle, uint32_t start_a
 
 // 删除未使用的yDev25q_CheckDirty函数
 
+/**
+ * @brief 25Q Flash擦除操作实现
+ * @param handle 25Q设备句柄指针
+ * @param start_address 擦除起始地址
+ * @param size 擦除数据大小
+ * @retval yDrvStatus_t 操作状态
+ * @note 自动选择最优擦除方式：64KB块擦除优先，不足部分使用4KB扇区擦除
+ * @note 地址自动对齐到扇区边界
+ */
 static yDrvStatus_t yDev25q_Erase(yDevHandle_25q_t *handle, uint32_t start_address, uint32_t size)
 {
     uint32_t current_address;
@@ -747,15 +839,18 @@ static yDrvStatus_t yDev25q_Erase(yDevHandle_25q_t *handle, uint32_t start_addre
     current_address = start_address & ~(YDEV_25Q_SECTOR_SIZE - 1);
 
     // 计算需要擦除的总大小（包含对齐产生的额外部分）
-    remaining_size = ((start_address + size + YDEV_25Q_SECTOR_SIZE - 1) & ~(YDEV_25Q_SECTOR_SIZE - 1)) - current_address;
+    remaining_size = ((start_address + size + YDEV_25Q_SECTOR_SIZE - 1) &
+                      ~(YDEV_25Q_SECTOR_SIZE - 1)) -
+                     current_address;
 
+    // 擦除循环：优先使用64KB块擦除，剩余部分使用4KB扇区擦除
     while (remaining_size > 0)
     {
-        // 根据剩余大小和地址对齐情况选择擦除方式
+        // 判断是否可以进行64KB块擦除
         if (remaining_size >= YDEV_25Q_BLOCK_SIZE &&
             (current_address % YDEV_25Q_BLOCK_SIZE) == 0)
         {
-            // 64KB块擦除
+            // 执行64KB块擦除
             erase_address = current_address;
             erase_size = YDEV_25Q_BLOCK_SIZE;
 
@@ -766,7 +861,7 @@ static yDrvStatus_t yDev25q_Erase(yDevHandle_25q_t *handle, uint32_t start_addre
                 return YDRV_TIMEOUT;
             }
 
-            // 写使能
+            // 发送写使能命令
             yDrvSpiCsControl(&handle->spi_handle, 1); // 选中芯片
             if (yDev25q_Spi_Transfer(handle, &write_enable_cmd, NULL, 1) != 1)
             {
@@ -776,12 +871,12 @@ static yDrvStatus_t yDev25q_Erase(yDevHandle_25q_t *handle, uint32_t start_addre
             }
             yDrvSpiCsControl(&handle->spi_handle, 0); // 取消选中
 
-            // 64KB块擦除命令
+            // 发送64KB块擦除命令
             yDrvSpiCsControl(&handle->spi_handle, 1); // 选中芯片
             erase_cmd[0] = YDEV_25Q_CMD_BLOCK_ERASE;
-            erase_cmd[1] = (erase_address >> 16) & 0xFF; // 高字节
-            erase_cmd[2] = (erase_address >> 8) & 0xFF;  // 中字节
-            erase_cmd[3] = erase_address & 0xFF;         // 低字节
+            erase_cmd[1] = (erase_address >> 16) & 0xFF; // 地址高字节
+            erase_cmd[2] = (erase_address >> 8) & 0xFF;  // 地址中字节
+            erase_cmd[3] = erase_address & 0xFF;         // 地址低字节
 
             if (yDev25q_Spi_Transfer(handle, erase_cmd, NULL, 4) != 4)
             {
@@ -800,7 +895,7 @@ static yDrvStatus_t yDev25q_Erase(yDevHandle_25q_t *handle, uint32_t start_addre
         }
         else
         {
-            // 4KB扇区擦除
+            // 执行4KB扇区擦除
             erase_address = current_address;
             erase_size = YDEV_25Q_SECTOR_SIZE;
 
@@ -811,7 +906,7 @@ static yDrvStatus_t yDev25q_Erase(yDevHandle_25q_t *handle, uint32_t start_addre
                 return YDRV_TIMEOUT;
             }
 
-            // 写使能
+            // 发送写使能命令
             yDrvSpiCsControl(&handle->spi_handle, 1); // 选中芯片
             if (yDev25q_Spi_Transfer(handle, &write_enable_cmd, NULL, 1) != 1)
             {
@@ -821,12 +916,12 @@ static yDrvStatus_t yDev25q_Erase(yDevHandle_25q_t *handle, uint32_t start_addre
             }
             yDrvSpiCsControl(&handle->spi_handle, 0); // 取消选中
 
-            // 4KB扇区擦除命令
+            // 发送4KB扇区擦除命令
             yDrvSpiCsControl(&handle->spi_handle, 1); // 选中芯片
             erase_cmd[0] = YDEV_25Q_CMD_SECTOR_ERASE;
-            erase_cmd[1] = (erase_address >> 16) & 0xFF; // 高字节
-            erase_cmd[2] = (erase_address >> 8) & 0xFF;  // 中字节
-            erase_cmd[3] = erase_address & 0xFF;         // 低字节
+            erase_cmd[1] = (erase_address >> 16) & 0xFF; // 地址高字节
+            erase_cmd[2] = (erase_address >> 8) & 0xFF;  // 地址中字节
+            erase_cmd[3] = erase_address & 0xFF;         // 地址低字节
 
             if (yDev25q_Spi_Transfer(handle, erase_cmd, NULL, 4) != 4)
             {
@@ -851,6 +946,8 @@ static yDrvStatus_t yDev25q_Erase(yDevHandle_25q_t *handle, uint32_t start_addre
 
     return YDRV_OK;
 }
+
+// ==================== 25Q设备操作导出 ====================
 
 YDEV_OPS_EXPORT_EX(
     YDEV_TYPE_25Q,   // 设备类型
