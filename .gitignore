@@ -53,3 +53,9 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+#build文件
+build/
+
+#build文件
+.vscode/
