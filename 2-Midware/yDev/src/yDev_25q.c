@@ -432,7 +432,7 @@ static int32_t yDev_25q_Write(void *handle, const void *buffer, uint16_t size)
     yDevHandle_25q_t *handle_25q;
     const uint8_t *write_buff;
     uint32_t current_address;
-    uint32_t total_written = 0;
+    uint32_t total_written;
     uint32_t page_offset;
     uint32_t write_size;
 
@@ -444,7 +444,7 @@ static int32_t yDev_25q_Write(void *handle, const void *buffer, uint16_t size)
 
     handle_25q = (yDevHandle_25q_t *)handle;
     write_buff = (const uint8_t *)buffer;
-
+    total_written = 0;
     // 检查地址有效性
     if ((handle_25q->address + size) > handle_25q->size)
     {
@@ -466,7 +466,8 @@ static int32_t yDev_25q_Write(void *handle, const void *buffer, uint16_t size)
         }
 
         // 处理非对齐写入 (读取-修改-写入)
-        if (page_offset != 0 || write_size != YDEV_25Q_PAGE_SIZE)
+        if ((page_offset != 0) ||
+            (write_size != YDEV_25Q_PAGE_SIZE))
         {
             uint8_t page_buffer[YDEV_25Q_PAGE_SIZE];
             uint32_t page_start = current_address & ~(YDEV_25Q_PAGE_SIZE - 1);
@@ -539,13 +540,7 @@ static yDevStatus_t yDev_25q_Ioctl(void *handle, uint32_t cmd, void *arg)
     {
     case YDEV_25Q_IOCTL_CHIP_ERASE:
         // 全片擦除操作
-        if (arg != NULL)
-        {
-            uint32_t *result = (uint32_t *)arg;
-            *result = yDev25q_Erase(handle_25q, 0, handle_25q->size);
-            return (*result == YDRV_OK) ? YDEV_OK : YDEV_ERROR;
-        }
-        return YDEV_INVALID_PARAM;
+        return yDev25q_Erase(handle_25q, 0, handle_25q->size);
 
     case YDEV_25Q_IOCTL_READ_JEDEC_ID:
         // 读取JEDEC ID
@@ -641,7 +636,8 @@ static uint8_t yDev25q_ReadReg(yDevHandle_25q_t *handle, uint8_t reg)
     uint8_t read_data[2];
 
     write_data[0] = reg;                      // 状态寄存器读取命令
-    yDrvSpiCsControl(&handle->spi_handle, 1); // 选中芯片
+    write_data[1] = 0xFF;                     // 读取数据填充
+    yDrvSpiCsControl(&handle->spi_handle, 0); // 选中芯片
 
     if (yDev25q_Spi_Transfer(handle, write_data, read_data, 2) != 2) // 发送命令并接收数据
     {
@@ -649,7 +645,7 @@ static uint8_t yDev25q_ReadReg(yDevHandle_25q_t *handle, uint8_t reg)
         return 0xFF;                              // 读取失败
     }
 
-    yDrvSpiCsControl(&handle->spi_handle, 0); // 取消选中
+    yDrvSpiCsControl(&handle->spi_handle, 1); // 取消选中
     return read_data[1];
 }
 
@@ -668,9 +664,9 @@ static yDrvStatus_t yDev25q_WaitBusy(yDevHandle_25q_t *handle, uint32_t timeout_
     uint8_t busy_mask;
 
     // 根据芯片类型确定状态寄存器和BUSY位
-    switch (handle->chip_type & 0xFF00)
+    switch (IdentifyChip25q[handle->chip_type] & 0xFF0000)
     {
-    case 0xEF00:                               // W25Q系列芯片
+    case 0xEF0000:                             // W25Q系列芯片
         reg_cmd = 0x05;                        // 状态寄存器1读取命令
         busy_mask = YDEV_25Q_STATUS_W25Q_BUSY; // BUSY位掩码
         break;
@@ -747,9 +743,10 @@ static uint32_t yDev25qReadJedecId(yDevHandle_25q_t *handle)
  * @retval yDrvStatus_t 操作状态
  * @note 执行完整的页编程流程：等待就绪->写使能->发送命令和地址->发送数据->等待完成
  */
-static yDrvStatus_t yDev25q_WritePage(yDevHandle_25q_t *handle, uint32_t start_address, const uint8_t *write_data)
+static yDrvStatus_t yDev25q_WritePage(yDevHandle_25q_t *handle,
+                                      uint32_t start_address,
+                                      const uint8_t *write_data)
 {
-    uint8_t write_enable_cmd = YDEV_25Q_CMD_WRITE_ENABLE;
     uint8_t write_cmd[4];
 
     // 1. 等待芯片就绪
@@ -760,17 +757,16 @@ static yDrvStatus_t yDev25q_WritePage(yDevHandle_25q_t *handle, uint32_t start_a
     }
 
     // 2. 发送写使能命令
-    yDrvSpiCsControl(&handle->spi_handle, 1); // 选中芯片(CS拉低)
-    if (yDev25q_Spi_Transfer(handle, &write_enable_cmd, NULL, 1) != 1)
+    write_cmd[0] = YDEV_25Q_CMD_WRITE_ENABLE; // 写使能命令
+    yDrvSpiCsControl(&handle->spi_handle, 0); // 选中芯片(CS拉低)
+    if (yDev25q_Spi_Transfer(handle, &write_cmd[0], NULL, 4) != 4)
     {
-        yDrvSpiCsControl(&handle->spi_handle, 0); // 取消选中
+        yDrvSpiCsControl(&handle->spi_handle, 1); // 取消选中
         handle->base.errno = YDEV_25Q_ERRNO_SPI_ERROR;
         return YDRV_ERROR;
     }
-    yDrvSpiCsControl(&handle->spi_handle, 0); // 取消选中
 
     // 3. 发送页编程命令和地址
-    yDrvSpiCsControl(&handle->spi_handle, 1);    // 选中芯片(CS拉低)
     write_cmd[0] = YDEV_25Q_CMD_PAGE_PROGRAM;    // 页编程命令
     write_cmd[1] = (start_address >> 16) & 0xFF; // 地址高字节
     write_cmd[2] = (start_address >> 8) & 0xFF;  // 地址中字节
@@ -778,7 +774,7 @@ static yDrvStatus_t yDev25q_WritePage(yDevHandle_25q_t *handle, uint32_t start_a
 
     if (yDev25q_Spi_Transfer(handle, write_cmd, NULL, 4) != 4)
     {
-        yDrvSpiCsControl(&handle->spi_handle, 0); // 取消选中
+        yDrvSpiCsControl(&handle->spi_handle, 1); // 取消选中
         handle->base.errno = YDEV_25Q_ERRNO_SPI_ERROR;
         return YDRV_ERROR;
     }
@@ -790,7 +786,6 @@ static yDrvStatus_t yDev25q_WritePage(yDevHandle_25q_t *handle, uint32_t start_a
         handle->base.errno = YDEV_25Q_ERRNO_SPI_ERROR;
         return YDRV_ERROR;
     }
-    yDrvSpiCsControl(&handle->spi_handle, 0); // 取消选中(CS拉高)
 
     // 5. 等待页编程完成
     if (yDev25q_WaitBusy(handle, YDEV_25Q_TIMEOUT_PAGE_PROGRAM) != YDRV_OK)
@@ -798,6 +793,7 @@ static yDrvStatus_t yDev25q_WritePage(yDevHandle_25q_t *handle, uint32_t start_a
         handle->base.errno = YDEV_25Q_ERRNO_TIMEOUT;
         return YDRV_TIMEOUT;
     }
+    yDrvSpiCsControl(&handle->spi_handle, 1); // 取消选中(CS拉高)
 
     return YDRV_OK;
 }
@@ -819,7 +815,7 @@ static yDrvStatus_t yDev25q_Erase(yDevHandle_25q_t *handle, uint32_t start_addre
     uint32_t remaining_size;
     uint32_t erase_address;
     uint32_t erase_size;
-    uint8_t write_enable_cmd = YDEV_25Q_CMD_WRITE_ENABLE;
+    uint8_t write_enable_cmd;
     uint8_t erase_cmd[4];
 
     // 参数有效性检查
@@ -842,6 +838,7 @@ static yDrvStatus_t yDev25q_Erase(yDevHandle_25q_t *handle, uint32_t start_addre
     remaining_size = ((start_address + size + YDEV_25Q_SECTOR_SIZE - 1) &
                       ~(YDEV_25Q_SECTOR_SIZE - 1)) -
                      current_address;
+    write_enable_cmd = YDEV_25Q_CMD_WRITE_ENABLE;
 
     // 擦除循环：优先使用64KB块擦除，剩余部分使用4KB扇区擦除
     while (remaining_size > 0)
@@ -854,6 +851,15 @@ static yDrvStatus_t yDev25q_Erase(yDevHandle_25q_t *handle, uint32_t start_addre
             erase_address = current_address;
             erase_size = YDEV_25Q_BLOCK_SIZE;
 
+            // 发送写使能命令
+            yDrvSpiCsControl(&handle->spi_handle, 0); // 选中芯片
+            if (yDev25q_Spi_Transfer(handle, &write_enable_cmd, NULL, 1) != 1)
+            {
+                yDrvSpiCsControl(&handle->spi_handle, 1); // 取消选中
+                handle->base.errno = YDEV_25Q_ERRNO_SPI_ERROR;
+                return YDRV_ERROR;
+            }
+
             // 等待芯片就绪
             if (yDev25q_WaitBusy(handle, YDEV_25Q_TIMEOUT_BLOCK_ERASE_64K) != YDRV_OK)
             {
@@ -861,18 +867,7 @@ static yDrvStatus_t yDev25q_Erase(yDevHandle_25q_t *handle, uint32_t start_addre
                 return YDRV_TIMEOUT;
             }
 
-            // 发送写使能命令
-            yDrvSpiCsControl(&handle->spi_handle, 1); // 选中芯片
-            if (yDev25q_Spi_Transfer(handle, &write_enable_cmd, NULL, 1) != 1)
-            {
-                yDrvSpiCsControl(&handle->spi_handle, 0); // 取消选中
-                handle->base.errno = YDEV_25Q_ERRNO_SPI_ERROR;
-                return YDRV_ERROR;
-            }
-            yDrvSpiCsControl(&handle->spi_handle, 0); // 取消选中
-
             // 发送64KB块擦除命令
-            yDrvSpiCsControl(&handle->spi_handle, 1); // 选中芯片
             erase_cmd[0] = YDEV_25Q_CMD_BLOCK_ERASE;
             erase_cmd[1] = (erase_address >> 16) & 0xFF; // 地址高字节
             erase_cmd[2] = (erase_address >> 8) & 0xFF;  // 地址中字节
@@ -884,7 +879,7 @@ static yDrvStatus_t yDev25q_Erase(yDevHandle_25q_t *handle, uint32_t start_addre
                 handle->base.errno = YDEV_25Q_ERRNO_SPI_ERROR;
                 return YDRV_ERROR;
             }
-            yDrvSpiCsControl(&handle->spi_handle, 0); // 取消选中
+            yDrvSpiCsControl(&handle->spi_handle, 1); // 取消选中
 
             // 等待块擦除完成
             if (yDev25q_WaitBusy(handle, YDEV_25Q_TIMEOUT_BLOCK_ERASE_64K) != YDRV_OK)

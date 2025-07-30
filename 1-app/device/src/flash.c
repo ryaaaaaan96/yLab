@@ -66,22 +66,27 @@ int32_t FlashInit(void)
         return -1;
     }
 
-    // 写数据进去
     for (size_t i = 0; i < sizeof(data) / sizeof(data[0]); i++)
     {
         data[i] = i;
         data2[i] = 11;
     }
+
+    // 全片擦除
+    yDevIoctl(&g_flash_handle, YDEV_25Q_IOCTL_CHIP_ERASE, NULL);
+
+    // 读取数据
+    len = 0;
+    while (len < sizeof(data2) / sizeof(data2[0]))
+    {
+        len += yDevRead(&g_flash_handle, &data2[len], sizeof(data2) - len);
+    }
+
+    // 写数据进去
     len = 0;
     while (len < sizeof(data) / sizeof(data[0]))
     {
         len += yDevWrite(&g_flash_handle, &data[len], sizeof(data) - len);
-    }
-
-    len = 0;
-    while (len < sizeof(data2) / sizeof(data2[0]))
-    {
-        len += yDevRead(&g_flash_handle, &data2[len], sizeof(data) - len);
     }
 
     return 0;
